@@ -334,6 +334,10 @@ select.search{width:auto}
           <div class="footnote">รายละเอียดการปรับแต่ง ดูไฟล์ DRR_KK_Dashboard_คู่มือ.html ในโฟลเดอร์เดียวกัน</div>
         </div>
       </div>
+      <div class="card" style="margin-top:14px"><h3>🔍 ตรวจรหัสสายทางในชีท เทียบบัญชี Master</h3>
+        <div class="note">รายการจาก Google Sheets ที่จับคู่บัญชีไม่ได้ = ขึ้นเป็น "หมวดไม่ระบุ" ในกราฟ — แก้โดยพิมพ์รหัสในชีทให้ตรง หรือเพิ่มสายในชีท "สายทาง" ของ Master แล้วแจ้ง rebuild</div>
+        <div id="sysCodeCheck"></div>
+      </div>
       <div class="card" style="margin-top:14px"><h3>สายทางที่ยังไม่มีเส้น GPS จริง (แนวประมาณ — รอสำรวจ)</h3><div class="note">แสดงบนแผนที่เป็น "เส้นประ" ชั่วคราว (ลากตรงจุดเริ่ม-จุดจบ) จนกว่าจะเก็บ GPS จริง</div><div id="sysStubs"></div></div>
 
       <div class="card" style="margin-top:14px"><h3>📍 วิธีอัปเดตข้อมูล GIS (เมื่อสำรวจเส้นทางใหม่เสร็จ)</h3>
@@ -939,7 +943,8 @@ function renderOverviewBudget(){
   const tot=H.reduce((a,x)=>a+x.amount,0);
   const kb=document.getElementById('kpiBudget');
   if(kb) kb.innerHTML=`<div class="lbl">งบสะสม (ตามสัญญา)</div><div class="val">${fmtM(tot)}</div><div class="foot">${H.length} สัญญา ปี ${Math.min(...H.map(x=>x.year))}–${Math.max(...H.map(x=>x.year))}</div>`;
-  const roadMuad=Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]));
+  const roadMuad={...Object.fromEntries(Object.values(EMB.bridges||{}).map(b=>[b.code,b.muad])),
+    ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))}; // สะพานชุมชนใช้หมวดจากบัญชีสะพาน
   const bM={}, bR={}, bT={};
   H.forEach(x=>{
     const m=roadMuad[x.code]||'ไม่ระบุ';
@@ -980,6 +985,34 @@ function renderSystem(){
   document.getElementById('sysStubs').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px">${
     stubs.map(c=>`<span class="pill wait" title="${esc(rowsByCode[c]?.name||'')}">${c} · ${esc(rowsByCode[c]?.amphoe||'-')}</span>`).join('')}</div>
     <div class="footnote">GIS มีเส้นของ ${(EMB.gisExtra||[]).length} สายที่ไม่อยู่ในชีทสายทางของ Master (${(EMB.gisExtra||[]).join(', ')||'—'}) — ไม่นำมาแสดงตามข้อกำหนดให้ยึด Master เป็นหลัก ถ้าเพิ่มแถวใน Master เมื่อไหร่ แจ้ง rebuild แล้วจะขึ้นเอง</div>`;
+  // ---- ตรวจรหัสจากชีทสด เทียบบัญชี Master + สะพาน ----
+  (()=>{
+    const box=document.getElementById('sysCodeCheck'); if(!box) return;
+    const known=new Set([...EMB.roads.map(r=>r.code), ...Object.keys(EMB.bridges||{})]);
+    const sources=[['ประวัติโครงการ', histData, x=>x.code, x=>x.activity, x=>x.year],
+                   ['คำของบประมาณ', reqData, x=>x.code, x=>x.act||x.proj, ()=>''],
+                   ['Zerobase', zbData, x=>x.code, x=>x.act, x=>x.year]];
+    const rows=[];
+    let loadedAny=false;
+    for(const [name, data, getC, getA, getY] of sources){
+      if(!data) continue;
+      loadedAny=true;
+      const bad={};
+      data.forEach(x=>{ const c=getC(x);
+        if(c&&known.has(c)) return;
+        const key=c||'(ไม่ผูกสายทาง เช่น งานอาคาร)';
+        bad[key]=bad[key]||{n:0,yrs:new Set(),eg:getA(x)||''};
+        bad[key].n++; const y=getY(x); if(y) bad[key].yrs.add(y);
+      });
+      Object.entries(bad).sort((a,b)=>b[1].n-a[1].n).forEach(([c,d])=>rows.push(
+        `<tr><td>${esc(name)}</td><td><b>${esc(c)}</b></td><td class="num">${d.n}</td><td style="font-variant-numeric:tabular-nums;font-size:11.5px">${[...d.yrs].sort().join(', ')||'—'}</td><td style="font-size:11.5px">${esc(String(d.eg).slice(0,40))}</td><td>${c.startsWith('(')?'<span class="pill wait">งานไม่ผูกสายทาง</span>':'<span class="pill miss">ไม่พบใน Master</span>'}</td></tr>`));
+    }
+    box.innerHTML = !loadedAny
+      ? '<div class="note">เปิดหน้าประวัติ / คำของบ / Zerobase ก่อน แล้วกลับมาดูผลตรวจที่นี่</div>'
+      : (rows.length
+        ? `<div class="tblwrap" style="max-height:320px"><table><thead><tr><th>แหล่งข้อมูล</th><th>รหัสในชีท</th><th class="num">รายการ</th><th>ปี</th><th>ตัวอย่างกิจกรรม</th><th>สถานะ</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`
+        : '<div class="lg"><span class="pill ok">✓ ผ่าน</span> ทุกรหัสในชีทที่โหลดแล้ว ตรงกับบัญชี Master/สะพานทั้งหมด</div>');
+  })();
   document.getElementById('ovComplete').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px">
       <div class="lg"><span class="pill ok">✓ ครบ</span> มีข้อมูล Master + เส้น GPS จริง — ${ALL_CODES.filter(c=>inMaster.has(c)&&realGeo.has(c)).length} สาย</div>
@@ -1440,7 +1473,8 @@ function renderHistory(){
     }),
     {unit:'ลบ.', stacked:true, height:330});
   // วงเงินต่อปี แยกหมวด
-  const roadMuad=Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]));
+  const roadMuad={...Object.fromEntries(Object.values(EMB.bridges||{}).map(b=>[b.code,b.muad])),
+    ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))}; // สะพานชุมชนใช้หมวดจากบัญชีสะพาน
   const muadsAll=[...MUAD_ORDER, 'ไม่ระบุ'];
   vbar('chHistMuad', years.map(String),
     muadsAll.map(m=>{
@@ -1448,7 +1482,15 @@ function renderHistory(){
       if(amts.every(a=>a===0)) return null;
       return {label:'หมวด'+m, color:m==='ไม่ระบุ'?'#c2beb6':muadColor(m),
         data:amts.map(a=>+(a/1e6).toFixed(1)),
-        tips:years.map((y,yi)=>`<b>ปี ${y} · หมวด${esc(m)}</b><br>วงเงิน ${fmt(amts[yi])} บาท · ${H.filter(x=>x.year===y&&(roadMuad[x.code]||'ไม่ระบุ')===m).length} โครงการ`)};
+        tips:years.map((y,yi)=>{
+          const inCell=H.filter(x=>x.year===y&&(roadMuad[x.code]||'ไม่ระบุ')===m);
+          let extra='';
+          if(m==='ไม่ระบุ'&&inCell.length){
+            const cs=[...new Set(inCell.map(x=>x.code||'ไม่ผูกสายทาง'))];
+            extra=`<br><span style="font-size:11px">${cs.slice(0,6).map(esc).join(' · ')}${cs.length>6?' …':''}</span>`;
+          }
+          return `<b>ปี ${y} · หมวด${esc(m)}</b><br>วงเงิน ${fmt(amts[yi])} บาท · ${inCell.length} โครงการ${extra}`;
+        })};
     }).filter(Boolean),
     {unit:'ลบ.', stacked:true, height:330});
   // กิจกรรมใช้งบมากสุด
