@@ -360,6 +360,7 @@ select.search{width:auto}
           <b>คอลัมน์ที่ dashboard อ่าน</b> (หัวตารางมีคำเหล่านี้อยู่ตรงไหนของข้อความก็ได้): เลขที่สัญญา · ชนิดงบ · กิจกรรม/ลักษณะงาน · รหัสสายทาง · เริ่มต้น/สิ้นสุดสัญญา · ส่งงานงวดสุดท้าย · วงเงินตามสัญญา · ผู้รับจ้าง · ผู้ควบคุมงาน · หน่วยดำเนินการ · ช่วงดำเนินการเริ่ม/จบ<br>
           <b>กติกาการอ่าน:</b><br>
           • นับเฉพาะแถวที่มี <b>เลขที่สัญญา</b> — แถวที่ยังไม่กรอกจะถูกตัดออก (ขึ้นจำนวนที่ตัดในหน้านี้)<br>
+          • นับเฉพาะ <b>ประเภทงบ "ก่อสร้าง"</b> — ประเภทอื่นถูกคัดออกทั้งแถว (แถวที่เว้นว่างคอลัมน์นี้ยังนับตามปกติ)<br>
           • <b>ปีงบ</b> อ่านจากเลข 4 ตัวท้ายของเลขที่สัญญา เช่น "15/2567" = ปี 2567 (ถ้าไม่มีใช้ปีของ tab)<br>
           • <b>รหัสสายทาง</b> ขอแค่มี ขก.xxxx อยู่ในเซลล์ (มีข้อความอื่นปนได้) รองรับ ขก/กส/ชย/รอ<br>
           • <b>ช่วง กม.</b> รูปแบบ 1+000 หลายช่วงในเซลล์เดียวได้ (คั่นด้วยจุลภาค/บรรทัดใหม่)<br>
@@ -980,10 +981,11 @@ function renderSystem(){
     <div class="card kpi"><div class="lbl">มีเส้น GPS จริง</div><div class="val">${withGeo} <small>/ ${ALL_CODES.length} สาย</small></div><div class="foot">${(100*withGeo/ALL_CODES.length).toFixed(0)}% ของบัญชี</div></div>
     <div class="card kpi"><div class="lbl">แนวประมาณ (รอสำรวจ)</div><div class="val" style="color:var(--crit)">${stubs.length} <small>สาย</small></div><div class="foot">มีแค่เส้นตรงจุดเริ่ม-จุดจบ</div></div>
     <div class="card kpi"><div class="lbl">GIS เกินบัญชี Master</div><div class="val">${(EMB.gisExtra||[]).length} <small>สาย</small></div><div class="foot">ไม่นำมาแสดง — ยึด Master เป็นหลัก</div></div>
-    <div class="card kpi"><div class="lbl">HISTORY ไม่มีเลขที่สัญญา</div><div class="val">${histDropped==null?'–':histDropped} <small>แถว</small></div><div class="foot">${histDropped==null?'เปิดหน้าประวัติโครงการก่อน':'ถูกตัดออกจากรายงาน รอกรอกเพิ่ม'}</div></div>`;
+    <div class="card kpi"><div class="lbl">HISTORY ไม่มีเลขที่สัญญา</div><div class="val">${histDropped==null?'–':histDropped} <small>แถว</small></div><div class="foot">${histDropped==null?'เปิดหน้าประวัติโครงการก่อน':'ถูกตัดออกจากรายงาน รอกรอกเพิ่ม'}</div></div>
+    <div class="card kpi"><div class="lbl">คัดออก (ไม่ใช่งบก่อสร้าง)</div><div class="val">${histData?histExcluded:'–'} <small>แถว</small></div><div class="foot">นับเฉพาะประเภทงบก่อสร้างตามข้อกำหนด</div></div>`;
   const rowsByCode=Object.fromEntries(R.map(r=>[r.code,r]));
   document.getElementById('sysStubs').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px">${
-    stubs.map(c=>`<span class="pill wait" title="${esc(rowsByCode[c]?.name||'')}">${c} · ${esc(rowsByCode[c]?.amphoe||'-')}</span>`).join('')}</div>
+    [...stubs].sort((a,b)=>SUF3(a)-SUF3(b)).map(c=>`<span class="pill wait" title="${esc(rowsByCode[c]?.name||'')}">${c} · ${esc(rowsByCode[c]?.amphoe||'-')}</span>`).join('')}</div>
     <div class="footnote">GIS มีเส้นของ ${(EMB.gisExtra||[]).length} สายที่ไม่อยู่ในชีทสายทางของ Master (${(EMB.gisExtra||[]).join(', ')||'—'}) — ไม่นำมาแสดงตามข้อกำหนดให้ยึด Master เป็นหลัก ถ้าเพิ่มแถวใน Master เมื่อไหร่ แจ้ง rebuild แล้วจะขึ้นเอง</div>`;
   // ---- ตรวจรหัสจากชีทสด เทียบบัญชี Master + สะพาน ----
   (()=>{
@@ -1028,7 +1030,8 @@ function renderRoadTable(){
   const stubGeo = new Set(EMB.geo.features.filter(f=>f.properties.stub).map(f=>f.properties.code));
   const tb = document.querySelector('#roadTable tbody');
   const rowsByCode = Object.fromEntries(R.map(r=>[r.code,r]));
-  tb.innerHTML = ALL_CODES.map(c=>{
+  // กติกา: ทะเบียนสายทางเรียงตามเลข 3 หลักท้ายเสมอ
+  tb.innerHTML = [...ALL_CODES].sort((a,b)=>SUF3(a)-SUF3(b)||a.localeCompare(b,'th')).map(c=>{
     const r = rowsByCode[c];
     if(!r) return `<tr data-s="${c}"><td><b>${c}</b></td><td colspan="8" style="color:var(--muted)">— ยังไม่มีข้อมูล —</td></tr>`;
     return `<tr data-code="${c}" data-s="${esc(c+' '+(r.name||'')+' '+(r.amphoe||'')+' '+(r.muad||''))}" style="cursor:pointer">
@@ -1275,7 +1278,7 @@ function selectRoad(code){
 /* ================= HISTORY (live) ================= */
 const HIST_ID='1mBDAhvJFgharY2JTV8VHcKCbUyLYVz4RThhGdu_JPM8';
 const HIST_PROBE_YEARS=Array.from({length:26},(_,i)=>60+i); // ไล่หา tab ปี Y_60 … Y_85 อัตโนมัติ
-let histData=null, histDropped=null;
+let histData=null, histDropped=null, histExcluded=0;
 async function loadHistory(force){
   if(histData && force!==true) return;
   const body=document.getElementById('histBody');
@@ -1283,12 +1286,12 @@ async function loadHistory(force){
   try{
     const all=[];
     const S=v=>String(v??'').trim();
-    const FIELDS=[['เลขที่สัญญา','contract'],['ชนิดงบ','budgetType'],['กิจกรรม','activity'],
+    const FIELDS=[['เลขที่สัญญา','contract'],['ประเภทงบ','budgetClass'],['ชนิดงบ','budgetType'],['กิจกรรม','activity'],
       ['ลักษณะงาน','worktype'],['รหัสสายทาง','roadFull'],['เริ่มต้นสัญญา','start'],['สิ้นสุดสัญญา','end'],
       ['ส่งงานงวดสุดท้าย','delivered'],['วงเงินตามสัญญา','amount'],['ผู้รับจ้าง','contractor'],
       ['ผู้ควบคุมงาน','supervisor'],['หน่วยดำเนินการ','agency'],
       ['ช่วงดำเนินการเริ่ม','kmA'],['ช่วงดำเนินการจบ','kmB']];
-    let dropped=0;
+    let dropped=0; histExcluded=0;
     // แปลงข้อมูล 1 tab -> รายการโครงการ (tabYear = ปีสำรอง ใช้เมื่อเลขที่สัญญาไม่มีปีท้าย)
     const parseTab=(objs, tabYear)=>{
       const recs=[]; let drop=0;
@@ -1297,6 +1300,8 @@ async function loadHistory(force){
         const contract=S(o.contract);
         const hasAny=Object.values(o).some(v=>S(v)!=='');
         if(!contract){ if(hasAny) drop++; return; } // ตาม query Excel: นับเฉพาะแถวที่มีเลขที่สัญญา
+        const bc=S(o.budgetClass);
+        if(bc && !bc.includes('ก่อสร้าง')){ histExcluded++; return; } // นับเฉพาะประเภทงบก่อสร้าง
         const code=extractRoadCode(o.roadFull)||null; // งานอาคาร/งานที่ไม่ผูกสายทาง -> null (นับในภาพรวม ไม่ขึ้นรายสาย)
         const year=yearFromContract(contract)||tabYear;
         if(!year) return; // tab แรกของไฟล์ที่ไม่รู้ปี: ต้องอ่านปีจากเลขที่สัญญาเท่านั้น
@@ -1389,7 +1394,7 @@ function renderHistory(){
   const hElecKm=H.reduce((a,x)=>a+segKmType(x,'e'),0);
   const hPoles=H.reduce((a,x)=>a+(poleCount(x)||0),0);
   const hBrM=H.reduce((a,x)=>a+segKmType(x,'b'),0)*1000;
-  const hR=H.filter(x=>segKmType(x,'r')>0||(!isElectric(x)&&!histIsBridge(x)&&!x.segs.length));
+  const hR=H.filter(x=>segKmType(x,'r')>0||(!isElectric(x)&&!histIsBridge(x)&&!histIsBuilding(x)&&!x.segs.length));
   const hE=H.filter(x=>poleCount(x)>0||(isElectric(x)&&!x.segs.length));
   const hB=H.filter(x=>segKmType(x,'b')>0||(histIsBridge(x)&&!isElectric(x)&&!x.segs.length));
   document.getElementById('histBody').innerHTML=`
@@ -1418,6 +1423,28 @@ function renderHistory(){
           <div class="wfoot">${hB.length?hB.length+' โครงการ':'—'}</div></div></div>
       </div>
     </div>
+    ${(()=>{ const hBld=H.filter(histIsBuilding);
+      const agencyCard=`<div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="kico" style="background:#e6f4f2;width:44px;height:44px;border-radius:12px;font-size:22px">🏛️</div>
+          <div style="flex:1;min-width:0">
+            <h3 style="margin-bottom:2px">หน่วยดำเนินการ</h3>
+            <div class="note">วงเงิน (ลบ.) · จำนวนโครงการ ของแต่ละหน่วย</div>
+            <div id="chAgency"></div>
+          </div>
+        </div>
+      </div>`;
+      const bldCard=hBld.length?`<div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="kico" style="background:#f0ecfa;width:44px;height:44px;border-radius:12px;font-size:22px">🏢</div>
+          <div style="flex:1;min-width:0">
+            <h3 style="margin-bottom:2px">งานอาคาร — ปรับปรุง/ก่อสร้าง</h3>
+            <div class="note">${hBld.length} โครงการ · วงเงินรวม ${fmtM(hBld.reduce((a,x)=>a+(x.amount||0),0))} — แยกตามหน่วย</div>
+            <div id="chBuilding"></div>
+          </div>
+        </div>
+      </div>`:'';
+      return `<div class="grid ${bldCard?'two':''}" style="margin-bottom:14px">${agencyCard}${bldCard}</div>`; })()}
     <div class="grid two">
       <div class="card"><h3>วงเงินตามสัญญาต่อปีงบประมาณ</h3><div class="note">ล้านบาท</div><div id="chHistYear"></div></div>
       <div class="card"><h3>วงเงินต่อปี แยกตามชนิดงบ (ครบทุกชนิด)</h3><div class="note">ล้านบาท — ชี้ที่แท่งเพื่อดูจำนวนโครงการและ % ของปีนั้น</div><div id="chHistType"></div></div>
@@ -1437,6 +1464,46 @@ function renderHistory(){
       </div>
       <div class="tblwrap" style="max-height:480px"><table id="histTable"><thead><tr><th>รหัส</th><th>ชื่อสายทาง</th><th>หมวด</th><th class="num">จำนวนโครงการ</th><th class="num">วงเงินรวม (บาท)</th><th>ปีที่มีงาน</th><th>กิจกรรมที่เคยทำ</th></tr></thead><tbody></tbody></table></div>
     </div>`;
+  // ---- หน่วยดำเนินการ: วงเงิน + จำนวน ----
+  (()=>{
+    const box=document.getElementById('chAgency'); if(!box) return;
+    const agencyOf=x=>{
+      const t=String(x.agency||'').trim();
+      if(!t) return 'ไม่ระบุ';
+      const m=MUAD_ORDER.find(mm=>t.includes(mm));
+      if(m) return 'หมวด'+m;
+      if(/แขวง/.test(t)) return 'แขวงฯ';
+      return t.slice(0,22);
+    };
+    const byA={};
+    H.forEach(x=>{ const u=agencyOf(x); byA[u]=byA[u]||{n:0,amt:0}; byA[u].n++; byA[u].amt+=(x.amount||0); });
+    const rows=Object.entries(byA).sort((a,b)=>b[1].amt-a[1].amt);
+    hbar('chAgency', rows.map(([u,d])=>({
+      label:u, v:+(d.amt/1e6).toFixed(1),
+      valText:`${fmt(+(d.amt/1e6).toFixed(1))} ลบ. · ${d.n} งาน`,
+      color:u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):(u==='ไม่ระบุ'?'#9aa5a3':C.teal)),
+      tip:`${d.n} โครงการ · ${fmt(d.amt)} บาท`})),
+      {unit:'ลบ.', labelW:110, valW:140, height:Math.max(140, rows.length*38+40)});
+  })();
+  // ---- งานอาคาร แยกตามหน่วย (แขวงฯ / หมวด) ----
+  (()=>{
+    const box=document.getElementById('chBuilding'); if(!box) return;
+    const hBld=H.filter(histIsBuilding);
+    const unitOf=x=>{
+      const t=(x.activity||'')+' '+(x.agency||'');
+      const m=MUAD_ORDER.find(mm=>t.includes(mm));
+      if(m) return 'หมวด'+m;
+      if(/แขวง/.test(t)) return 'แขวงฯ';
+      return 'ไม่ระบุหน่วย';
+    };
+    const byU={};
+    hBld.forEach(x=>{ const u=unitOf(x); byU[u]=byU[u]||{n:0,amt:0,eg:[]}; byU[u].n++; byU[u].amt+=(x.amount||0); if(byU[u].eg.length<3) byU[u].eg.push((x.activity||'').slice(0,36)); });
+    hbar('chBuilding', Object.entries(byU).sort((a,b)=>b[1].amt-a[1].amt).map(([u,d])=>({
+      label:u, v:+(d.amt/1e6).toFixed(2),
+      color:u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):'#9aa5a3'),
+      tip:`${d.n} โครงการ · ${fmt(d.amt)} บาท<br><span style="font-size:11px">${d.eg.map(esc).join(' · ')}</span>`})),
+      {unit:'ลบ.', labelW:110, height:Math.max(120, Object.keys(byU).length*40+40)});
+  })();
   // ชี้ที่ช่อง "ปริมาณงานสะสม" -> โชว์รายชื่อโครงการที่ประกอบเป็นตัวเลข (ตรวจสอบย้อนกลับได้)
   const tileTip=(items,fq,title)=>{
     const list=items.slice(0,12).map(x=>`${x.year} · ${x.code} · ${esc((x.activity||'—').slice(0,34))} — <b>${fq(x)}</b>`).join('<br>');
@@ -1718,6 +1785,7 @@ const isElectric=x=>/ไฟฟ้า|แสงสว่าง|ไฟกระพ
    (ความยาวสะพานในงานผสมนับเฉพาะช่วงที่ติดป้าย "(สะพาน)" เท่านั้น กันเลขบวม) */
 const histIsBridge=x=>{ const t=(x.activity||'')+(x.budgetType||''); return /สะพาน/.test(t)&&!/ทาง|ถนน/.test(t); };
 const histIsMixedBridge=x=>{ const t=(x.activity||'')+(x.budgetType||''); return /สะพาน/.test(t)&&/ทาง|ถนน/.test(t); };
+const histIsBuilding=x=>/อาคาร/.test((x.budgetType||'')+' '+(x.activity||''));
 /* ปริมาณตามชนิดของ "แต่ละช่วง" (t: r=ถนน e=ไฟฟ้า b=สะพาน) — โครงการเดียวมีหลายชนิดปนได้ */
 const segKmType=(x,t)=>x.segs.filter(s=>(s.t||'r')===t).reduce((a,s)=>a+(s.b-s.a),0);
 const poleCount=x=>{ const m=segKmType(x,'e')*1000; return m>0?Math.max(1,Math.round(m/30)):0; };
@@ -1857,7 +1925,7 @@ function renderRequests(){
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
           <h3 style="margin:0">มุมมองรวมรายสาย</h3>
-          <select class="search" id="reqRoadSel">${counts.map(([c,n])=>`<option value="${c}">${c} (${n} คำขอ)</option>`).join('')}</select>
+          <select class="search" id="reqRoadSel">${[...counts].sort((a,b)=>SUF3(a[0])-SUF3(b[0])||a[0].localeCompare(b[0],'th')).map(([c,n])=>`<option value="${c}">${c} (${n} คำขอ)</option>`).join('')}</select>
         </div>
         <div id="reqDetail"></div>
       </div>
@@ -1900,7 +1968,7 @@ function renderRequests(){
     .map(m=>({label:'หมวด'+m, segs:muadRows[m].segs, right:`${muadRows[m].n} คำขอ · ${muadRows[m].roads.size} สาย`}));
   hstack('chReqMuad', mRows, segsOrder, {unit:'คำขอ'});
   // ตารางสรุปรายสาย
-  document.querySelector('#reqRoadTable tbody').innerHTML = counts.map(([code,n])=>{
+  document.querySelector('#reqRoadTable tbody').innerHTML = [...counts].sort((a,b)=>SUF3(a[0])-SUF3(b[0])||a[0].localeCompare(b[0],'th')).map(([code,n])=>{
     const list=byRoad[code], r=roadInfo[code];
     const km=list.reduce((a,x)=>a+x.km,0);
     const amt=list.reduce((a,x)=>a+(x.amt||0),0);
@@ -2130,7 +2198,7 @@ function renderZbOverview(){
   // ตารางรายสาย
   const renderTbl=()=>{
     const q=(document.getElementById('zbSearch').value||'').trim().toLowerCase();
-    document.querySelector('#zbRoadTable tbody').innerHTML=counts
+    document.querySelector('#zbRoadTable tbody').innerHTML=[...counts].sort((a,b)=>SUF3(a[0])-SUF3(b[0])||a[0].localeCompare(b[0],'th'))
       .filter(([c])=>{const rd=roadInfo[c];return (c+' '+(rd?.name||'')+' '+(rd?.amphoe||'')+' '+(rd?.muad||'')).toLowerCase().includes(q);})
       .map(([code,n])=>{
         const rd=roadInfo[code], list=byRoad[code];
