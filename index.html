@@ -227,6 +227,15 @@ select.search{width:auto}
           <th>รหัส</th><th>ชื่อสายทาง</th><th>หมวด</th><th>อำเภอ</th><th class="num">ระยะทาง (กม.)</th><th class="num">ลาดยาง</th><th class="num">คอนกรีต</th><th class="num">ลูกรัง</th><th class="num">สะพาน</th>
         </tr></thead><tbody></tbody></table></div>
       </div>
+      <div class="card" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+          <div><h3>🌉 ทะเบียนสะพานชุมชน</h3><div class="note" style="margin:0">คลิกแถวเพื่อดูประวัติโครงการของสะพาน</div></div>
+          <input class="search" id="bridgeSearch" placeholder="ค้นหา รหัส/ชื่อสะพาน/อำเภอ...">
+        </div>
+        <div class="tblwrap" style="max-height:380px"><table id="bridgeTable"><thead><tr>
+          <th>รหัส</th><th>ชื่อสะพาน</th><th>ข้ามลำน้ำ</th><th>หมวด</th><th>ตำบล / อำเภอ</th><th class="num">ยาว (ม.)</th><th class="num">กว้าง (ม.)</th><th>ปีที่สร้าง</th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
       <div class="footnote">สายที่ยังไม่มีเส้น GPS จริง และรายละเอียดแหล่งข้อมูล/วิธีอัปเดต — ดูหน้า "ข้อมูลระบบ"</div>
     </section>
 
@@ -234,7 +243,7 @@ select.search{width:auto}
     <section class="page" id="pg-map">
       <div class="pghero">
         <div class="pgh-left"><div class="pgh-ico">◈</div>
-          <div><h2>แผนที่สายทาง (GIS)</h2><div class="desc">แบ่งสีตามหมวด — เส้นทึบ = GPS จริง · เส้นประ = แนวประมาณ (รอสำรวจ) · คลิกสายเพื่อดูรายละเอียด / คลิกพื้นที่ว่างเพื่อคัดลอกพิกัด</div>
+          <div><h2>แผนที่สายทาง (GIS)</h2><div class="desc">คลิกสายเพื่อดูรายละเอียด · คลิกพื้นที่ว่างเพื่อคัดลอกพิกัด</div>
             <div class="pillrow" id="mapPills"></div></div>
         </div>
         <div class="pgh-right"><button class="hbtn" onclick="reloadPage()">⟳ โหลดข้อมูลใหม่</button><button class="hbtn" onclick="printPage()">🖨 พิมพ์</button></div>
@@ -293,7 +302,6 @@ select.search{width:auto}
         <div class="pgh-right"><button class="hbtn" onclick="reloadPage()">⟳ โหลดข้อมูลใหม่</button><button class="hbtn" onclick="exportCSV()">⬇ CSV</button><button class="hbtn" onclick="printPage()">🖨 พิมพ์</button></div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-        <div style="font-size:12.5px;color:var(--ink2)">💡 สรุปรายสาย (อดีต · คำของบ · Zerobase ครบในหน้าเดียว) อยู่ที่ "ประวัติสายทาง → ② สรุปรายสาย" — คลิกสายจากกราฟ/ตารางด้านล่างเพื่อเปิดได้เลย</div>
         <span style="display:flex;align-items:center;gap:8px;flex:none">
           <label style="font-size:12.5px;color:var(--ink2)">ปีงบ :</label>
           <select class="search" id="zbYearSel" style="padding:5px 10px"></select>
@@ -334,7 +342,7 @@ select.search{width:auto}
           <tr><td>2</td><td>ตั้งชื่อไฟล์ตามแบบ <code style="background:#eef2f1;padding:1px 6px;border-radius:4px">road_ขก_2143.geojson</code> แล้ววางไว้ที่ <b>03. Raw Data\\GIS Layers Export</b> (ถ้าได้มาเป็น Shapefile แจ้ง Claude แปลงให้ได้)</td></tr>
           <tr><td>3</td><td>ถ้าเป็นสายที่แก้ระยะทาง/ชื่อ/หมวดด้วย ให้แก้ในชีท "สายทาง" ของ DRR_KK_Master.xlsx ให้ตรงกัน</td></tr>
           <tr><td>4</td><td>บอก Claude ว่า <b>"อัปเดต snapshot dashboard จาก Master/GIS"</b> — Claude จะ rebuild ไฟล์ dashboard ให้ (ไม่กี่นาที) เส้นประจะกลายเป็นเส้นทึบอัตโนมัติ</td></tr>
-          <tr><td>5</td><td>ถ้าแชร์เป็นลิงก์ไว้: ลากโฟลเดอร์ <b>Deploy</b> ขึ้น Netlify ซ้ำหนึ่งครั้ง ลิงก์เดิมจะเป็นเวอร์ชันใหม่</td></tr>
+          <tr><td>5</td><td>ถ้าแชร์เป็นลิงก์ไว้: อัปโหลดไฟล์ <b>Deploy\\index.html</b> ขึ้น GitHub repo เดิม (Add file → Upload files) ลิงก์เดิมจะเป็นเวอร์ชันใหม่</td></tr>
         </tbody></table>
         <div class="footnote">ข้อมูลที่ "ไม่ต้อง" ทำแบบนี้: ประวัติโครงการ/คำของบใน Google Sheets — แค่กรอกแล้วรีเฟรช dashboard ขึ้นเองทันที</div>
       </div>
@@ -398,11 +406,22 @@ select.search{width:auto}
           <b>วิธีอัปเดต:</b> แก้ไฟล์นี้ → แจ้ง Claude rebuild (เป็น snapshot ฝังในไฟล์เหมือน Master)</div>
         </details>
 
-        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">🔗 การแชร์ชีท + ลิงก์ Netlify</summary>
+        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">🔗 การแชร์ชีท + ลิงก์ GitHub Pages</summary>
           <div style="font-size:12.5px;line-height:1.85;padding:8px 4px">
           • Google Sheets ทุกไฟล์ (ประวัติ / คำของบ / ZEROBASE) ต้องแชร์แบบ <b>"ทุกคนที่มีลิงก์ — ผู้มีสิทธิ์ดู"</b> ไม่งั้น dashboard ดึงไม่ได้ (ขึ้นแถบแดง)<br>
           • เปลี่ยนไฟล์ชีทต้นทาง: เปิด dashboard ด้วย Notepad แก้ค่า <code>HIST_ID</code> / <code>REQ_ID</code> / <code>ZB_ID</code> (ID คือตัวอักษรยาวๆ ใน URL ของชีท)<br>
-          • อัปเดตลิงก์ Netlify: ก๊อปไฟล์ dashboard ใหม่ทับ <b>Deploy\\index.html</b> แล้วลากโฟลเดอร์ Deploy วางที่หน้า Deploys ของ site เดิม — ลิงก์เดิมกลายเป็นเวอร์ชันใหม่ทันที</div>
+          • <b>ลิงก์เว็บ:</b> <code>https://violencezkorncivil-sketch.github.io/drrkk-bigdata-dashboard/</code> (GitHub Pages จาก repo drrkk-bigdata-dashboard)<br>
+          • <b>อัปเดตเวอร์ชันใหม่:</b> ① เข้า repo บน github.com ② กด <b>Add file → Upload files</b> ③ ลากไฟล์ <b>Deploy\\index.html</b> ไปวาง (ชื่อไฟล์ต้องเป็น <code>index.html</code> ตัวพิมพ์เล็กทั้งหมด — ตัวใหญ่จะขึ้น 404) ④ กด Commit changes ⑤ รอ 1–2 นาที ลิงก์เดิมกลายเป็นเวอร์ชันใหม่<br>
+          • เว็บขึ้น 404: เช็คว่าไฟล์ใน repo ชื่อ <code>index.html</code> เป๊ะๆ และ Settings → Pages เปิดใช้อยู่ (Deploy from branch: main)</div>
+        </details>
+        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">🗺 ความหมายใน Strip Map (หน้าสรุปรายสาย)</summary>
+          <div style="font-size:12.5px;line-height:1.85;padding:8px 4px">
+          อดีต → อนาคต ในภาพเดียว เรียงจากบนลงล่าง:<br>
+          • <b>ครอบคลุมรวม</b> (เทา) = ระยะที่เคยมีงานทับกันแล้วทั้งหมด<br>
+          • <b>เลนสีตามปีงบ</b> = งานที่ทำไปแล้วของแต่ละปี — แถบทึบ = งานถนน · จุด ● (แถวบนของเลน) = งานไฟฟ้า/แสงสว่าง<br>
+          • <b>เลนคำของบ</b> (ชมพู) = คำขอที่กำลังเสนอ จากชีทรวมแผน<br>
+          • <b>เลน Zerobase</b> (แดง) = ความต้องการจริงจากพื้นที่ ทุกปีรวมกัน<br>
+          • <b>▲ แถวสะพาน</b> = ตำแหน่งสะพานในสายทางตามบัญชี — ชี้ทุกอย่างเพื่อดูรายละเอียดเต็ม</div>
         </details>
       </div>
 
@@ -421,17 +440,20 @@ select.search{width:auto}
           • เปลี่ยนชีทต้นทาง: แก้ค่า <code>HIST_ID</code> / <code>REQ_ID</code> (ID ยาวๆ ใน URL ของชีท ต้องแชร์ "ทุกคนที่มีลิงก์")<br>
           ⚠ ก่อนแก้ copy ไฟล์สำรองไว้เสมอ — ถ้าแก้แล้วหน้าขาว ให้กลับไปใช้ตัวสำรอง</div>
         </details>
-        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">🌐 แชร์เป็นลิงก์ (Netlify)</summary>
+        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">🌐 แชร์เป็นลิงก์ (GitHub Pages)</summary>
           <div style="font-size:12.5px;line-height:1.8;padding:8px 4px">
-          1) สมัคร app.netlify.com (ครั้งเดียว ฟรี) → 2) เข้า app.netlify.com/drop ลากโฟลเดอร์ <b>01. Dash Board\\Deploy</b> ไปวาง → 3) ได้ลิงก์ .netlify.app ส่งให้ใครก็เปิดได้ทั้งมือถือ/คอม<br>
-          อัปเดตเวอร์ชันใหม่: ลากโฟลเดอร์เดิมวางซ้ำใน Deploys ของ site นั้น · สร้างหลายโปรเจคได้: Add new site → Deploy manually</div>
+          ลิงก์ปัจจุบัน: <code>https://violencezkorncivil-sketch.github.io/drrkk-bigdata-dashboard/</code><br>
+          ตั้งครั้งเดียว: สร้าง repo (Public) → Settings → Pages → Deploy from branch <code>main</code><br>
+          อัปเดตเวอร์ชันใหม่: เข้า repo → <b>Add file → Upload files</b> → ลาก <b>Deploy\\index.html</b> วาง → Commit → รอ 1–2 นาที<br>
+          ⚠ ชื่อไฟล์ต้องเป็น <code>index.html</code> ตัวพิมพ์เล็กทั้งหมด ไม่งั้นเข้าลิงก์แล้วขึ้น 404</div>
         </details>
         <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">❗ ปัญหาที่พบบ่อย</summary>
           <div style="font-size:12.5px;line-height:1.8;padding:8px 4px">
           • แถบแดง "ดึงข้อมูลไม่สำเร็จ" → ไม่มีเน็ต / ชีทไม่ได้แชร์ทุกคนที่มีลิงก์ / ชื่อ tab ถูกเปลี่ยน<br>
           • แผนที่พื้นหลังเทา → ไม่มีเน็ต (เส้นสายทางยังแสดงเพราะฝังในไฟล์)<br>
           • ข้อมูลใหม่ไม่ขึ้น → กด ⟳ หรือ Ctrl+F5 (Google cache ~1-2 นาที)<br>
-          • เปิดจากมือถือโดยตรงไม่ได้ → ใช้ลิงก์ Netlify แทนการส่งไฟล์</div>
+          • เปิดจากมือถือโดยตรงไม่ได้ → ใช้ลิงก์ GitHub Pages แทนการส่งไฟล์<br>
+          • ลิงก์ GitHub ขึ้น 404 → ไฟล์ใน repo ต้องชื่อ <code>index.html</code> ตัวพิมพ์เล็กทั้งหมด</div>
         </details>
         <div class="footnote">ฉบับเต็มอยู่ที่ไฟล์ DRR_KK_Dashboard_คู่มือ.html ในโฟลเดอร์ 01. Dash Board</div>
       </div>
@@ -836,6 +858,13 @@ function exportCSV(){
 const MUAD_ORDER=['เมือง','น้ำพอง','หนองเรือ','มัญจาคีรี','พล'];
 const MUAD_COLOR={'เมือง':'#d9a441','น้ำพอง':'#2a78d6','หนองเรือ':'#008300','มัญจาคีรี':'#4a3aa7','พล':'#e87ba4'};
 const muadColor = m => MUAD_COLOR[m]||'#9aa5a3';
+/* KPI การ์ดแบบมีไอคอน (ใช้ร่วมทุกหน้า) */
+const kico=(ico,bg,lbl,val,foot)=>`<div class="card kpi iko"><div class="kico" style="background:${bg}">${ico}</div><div style="min-width:0"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="foot">${foot}</div></div></div>`;
+const SUF3=c=>{ const d=(String(c).split('.')[1]||''); return parseInt(d.slice(-3),10)||999; };
+/* สีชนิดงบตายตัว: ยกระดับ=ส้ม บำรุง=ฟ้า ปลอดภัย=เขียว จังหวัด=แดง วิจัย=เหลือง สะพาน=เทา */
+const BT_COLOR=[['ยกระดับ','#eb6834'],['บำรุง','#2a78d6'],['ปลอดภัย','#008300'],['จังหวัด','#e34948'],['วิจัย','#d9a441'],['สะพาน','#8a8f98'],['อาคาร','#4a3aa7'],['พระราชดำริ','#0d9488'],['ซ่อม','#e87ba4']];
+const btColor=t=>{ const hit=BT_COLOR.find(([k])=>String(t).includes(k)); return hit?hit[1]:null; };
+const btColorMap=names=>{ const o={}; let fb=0; names.forEach(n=>{ o[n]=btColor(n)||CAT8[(fb++)%8]; }); return o; };
 const PROVINCE = {'ขก':'ขอนแก่น','กส':'กาฬสินธุ์','ชย':'ชัยภูมิ','รอ':'ร้อยเอ็ด'};
 
 function renderOverview(){
@@ -853,13 +882,14 @@ function renderOverview(){
     `<span class="hpill" id="ovBudPill" style="display:none"></span>`;
   if(histData) renderOverviewBudgetPill();
 
-  document.getElementById('ovKpis').innerHTML = `
-    <div class="card kpi"><div class="lbl">สายทางในบัญชี</div><div class="val">${ALL_CODES.length} <small>สาย</small></div><div class="foot">บัญชีหลักของแขวงฯ</div></div>
-    <div class="card kpi"><div class="lbl">ระยะทางรวม</div><div class="val">${fmt(totKm)} <small>กม.</small></div><div class="foot">ตามบัญชีโครงข่าย</div></div>
-    <div class="card kpi"><div class="lbl">ผิวลาดยาง</div><div class="val">${fmt(lat)} <small>กม.</small></div><div class="foot">${(100*lat/totKm).toFixed(1)}% ของโครงข่าย</div></div>
-    <div class="card kpi"><div class="lbl">สะพาน</div><div class="val">${fmt(bridges)} <small>แห่ง</small></div><div class="foot">ตามบัญชีโครงข่าย</div></div>
-    <div class="card kpi"><div class="lbl">ความยาวสะพานรวม</div><div class="val">${fmt(bridgeLen)} <small>กม.</small></div><div class="foot">รวมทุกหมวด</div></div>
-    <div class="card kpi" id="kpiBudget"><div class="lbl">งบสะสม (ตามสัญญา)</div><div class="val">…</div><div class="foot">จากประวัติโครงการทุกปี</div></div>`;
+  const ovk=document.getElementById('ovKpis'); ovk.className='grid kpis kpi3';
+  ovk.innerHTML =
+    kico('🛣️','#e6f4f2','สายทางในบัญชี', `${ALL_CODES.length} <small>สาย</small>`, 'บัญชีหลักของแขวงฯ')+
+    kico('📏','#edf2fa','ระยะทางรวม', `${fmt(totKm)} <small>กม.</small>`, 'ตามบัญชีโครงข่าย')+
+    kico('🚧','#f0f0f2','ผิวลาดยาง', `${fmt(lat)} <small>กม.</small>`, `${(100*lat/totKm).toFixed(1)}% ของโครงข่าย`)+
+    kico('🌉','#eaf2fc','สะพาน', `${fmt(bridges)} <small>แห่ง</small>`, 'ตามบัญชีโครงข่าย')+
+    kico('📐','#f0ecfa','ความยาวสะพานรวม', `${fmt(bridgeLen)} <small>กม.</small>`, 'รวมทุกหมวด')+
+    `<div class="card kpi iko"><div class="kico" style="background:#e9f6ee">💰</div><div style="min-width:0" id="kpiBudget"><div class="lbl">งบสะสม (ตามสัญญา)</div><div class="val">…</div><div class="foot">จากประวัติโครงการทุกปี</div></div></div>`;
 
   // ---- สรุปรายหมวด (ตาราง) ----
   const byM={};
@@ -875,21 +905,18 @@ function renderOverview(){
   }).join('') + `<tr style="background:var(--teal-soft);font-weight:700"><td>รวม</td><td class="num">${R.length}</td><td class="num">${fmt(+totKm.toFixed(2))}</td><td class="num">${bridges}</td><td class="num">${fmt(+bridgeLen.toFixed(3))}</td></tr>`;
 
   // ---- ผิวจราจรรายหมวด (stacked + % ของหมวดใน tooltip) ----
-  const surfKeys=[['ลาดยาง','lat',C.violet],['คอนกรีต','con',C.blue],['ลูกรัง','luk',C.gold]]; /* ลาดยาง = ม่วง ตามข้อกำหนด */
-  vbar('chSurfaceMuad', muads.map(m=>m),
-    surfKeys.map(([lb,key,col])=>({label:lb, color:col,
-      data:muads.map(m=>+byM[m][key].toFixed(1)),
-      tips:muads.map(m=>{
-        const totM=byM[m].lat+byM[m].con+byM[m].luk;
-        return `<b>หมวด${esc(m)} · ${lb}</b><br>${fmt(+byM[m][key].toFixed(1))} กม. (${totM?(100*byM[m][key]/totM).toFixed(1):0}% ของหมวด)`;
-      })})),
-    {unit:'กม.', stacked:true, height:300});
+  const surfKeys=[['ลาดยาง','lat','#52525b'],['คอนกรีต','con',C.blue],['ลูกรัง','luk',C.gold]]; /* ลาดยาง = เทาเข้ม (สียางมะตอย) แยกจากคอนกรีตฟ้าชัดเจน */
+  hstack('chSurfaceMuad',
+    [...muads].sort((a,b)=>byM[b].km-byM[a].km).map(m=>({label:'หมวด'+m,
+      segs:{'ลาดยาง':+byM[m].lat.toFixed(1),'คอนกรีต':+byM[m].con.toFixed(1),'ลูกรัง':+byM[m].luk.toFixed(1)},
+      right:fmt(+byM[m].km.toFixed(1))+' กม.'})),
+    surfKeys.map(([lb,,col])=>({k:lb,label:lb,color:col})), {unit:'กม.'});
 
   const pairs = muads.map(m=>['หมวด'+m, byM[m].km]).filter(p=>p[1]>0).sort((a,b)=>b[1]-a[1]);
   hbar('chAmphoe', pairs.map(p=>({label:p[0], v:+p[1].toFixed(2)})), {unit:'กม.', height:300});
 
   donut('chSurface', [
-    {label:'ลาดยาง', v:+lat.toFixed(1), color:C.violet},
+    {label:'ลาดยาง', v:+lat.toFixed(1), color:'#52525b'},
     {label:'คอนกรีต', v:+con.toFixed(1), color:C.blue},
     {label:'ลูกรัง', v:+luk.toFixed(1), color:C.gold}]);
 
@@ -917,7 +944,7 @@ function renderOverviewBudget(){
   H.forEach(x=>{
     const m=roadMuad[x.code]||'ไม่ระบุ';
     bM[m]=(bM[m]||0)+x.amount;
-    bR[x.code]=(bR[x.code]||0)+x.amount;
+    if(x.code) bR[x.code]=(bR[x.code]||0)+x.amount;
     bT[x.budgetType]=(bT[x.budgetType]||0)+x.amount;
   });
   document.getElementById('ovBudget').innerHTML=`
@@ -932,7 +959,7 @@ function renderOverviewBudget(){
   hbar('chBudRoad', rPairs.map(p=>({label:p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(roadMuad[p[0]]),
     tip:`${fmt(p[1])} บาท · หมวด${roadMuad[p[0]]||'-'}`})), {labelW:70});
   const tPairs=Object.entries(bT).sort((a,b)=>b[1]-a[1]);
-  const TC=colorByOrder(tPairs.map(p=>p[0]));
+  const TC=btColorMap(tPairs.map(p=>p[0]));
   donut('chBudType', tPairs.map(p=>({label:p[0], v:+(p[1]/1e6).toFixed(1), color:TC[p[0]]})), {unit:'ลบ.', height:290});
 }
 
@@ -977,35 +1004,33 @@ function renderRoadTable(){
       <td>${esc(r.amphoe)}</td>
       <td class="num">${fmt(r.len_acct)}</td><td class="num">${fmt(r.latyang)}</td><td class="num">${fmt(r.concrete)}</td><td class="num">${fmt(r.lukrang)}</td>
       <td class="num">${r.bridges_acct||0}</td></tr>`;
-  }).join('')
-  /* ---- สะพานชุมชน (บัญชี MASTER_BRIDGE) ต่อท้ายบัญชีถนน ---- */
-  + (()=>{ const BR=Object.values(EMB.bridges||{});
-    if(!BR.length) return '';
-    const bs=[...BR].sort((a,b)=>a.code.localeCompare(b.code,'th'));
-    return `<tr data-s="สะพานชุมชน"><td colspan="9" style="background:var(--navy);color:#fff;font-weight:700;font-size:12.5px">🌉 สะพานชุมชน — ${BR.length} แห่ง · ความยาวเป็นเมตร</td></tr>`
-      + bs.map(b=>{
-        const det=[`กว้าง ${fmt(b.width)} ม.`];
-        if(b.surface) det.push('ผิว '+esc(b.surface));
-        if(b.year) det.push('สร้างปี '+esc(b.year));
-        if(b.pcu) det.push('PCU '+fmt(b.pcu));
-        return `<tr data-code-br="${b.code}" data-s="${esc(b.code+' '+(b.name||'')+' '+(b.amphoe||'')+' '+(b.muad||'')+' '+(b.river||'')+' สะพานชุมชน')}" style="cursor:pointer">
-        <td><b>${b.code}</b></td><td>${esc(b.name||'—')} <span class="pill wait" style="font-size:10px">สะพาน</span><div style="font-size:11px;color:var(--muted)">ข้าม${esc(b.river||'-')} · ต.${esc(b.tambon||'-')}</div></td>
-        <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${muadColor(b.muad)};margin-right:6px"></span>${b.muad?esc(b.muad):'—'}</td>
-        <td>${esc(b.amphoe||'—')}</td>
-        <td class="num">${fmt(b.len)} ม.</td><td class="num" colspan="3" style="text-align:left;color:var(--ink2)">${det.join(' · ')}</td>
-        <td class="num">1</td></tr>`;}).join('');
-  })();
+  }).join('');
+  /* ---- ทะเบียนสะพานชุมชน (ตารางแยกจากถนน) ---- */
+  const btb=document.querySelector('#bridgeTable tbody');
+  if(btb){
+    const bs=Object.values(EMB.bridges||{}).sort((a,b)=>SUF3(a.code)-SUF3(b.code)||a.code.localeCompare(b.code,'th'));
+    btb.innerHTML=bs.map(b=>`<tr data-code-br="${b.code}" data-s="${esc(b.code+' '+(b.name||'')+' '+(b.amphoe||'')+' '+(b.tambon||'')+' '+(b.muad||'')+' '+(b.river||''))}" style="cursor:pointer">
+      <td><b>${b.code}</b></td><td>${esc(b.name||'—')}</td><td>${esc(b.river||'—')}</td>
+      <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${muadColor(b.muad)};margin-right:6px"></span>${b.muad?esc(b.muad):'—'}</td>
+      <td>${esc(b.tambon||'-')} / ${esc(b.amphoe||'-')}</td>
+      <td class="num">${fmt(b.len)}</td><td class="num">${fmt(b.width)}</td><td>${esc(b.year)||'—'}</td></tr>`).join('');
+    btb.querySelectorAll('tr[data-code-br]').forEach(tr=>tr.addEventListener('click',()=>{
+      histRoadCode=tr.dataset.codeBr;
+      document.querySelector('.nav button[data-page="history"]').click();
+      document.querySelector('#pg-history .subtabs button[data-ht="road"]').click();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }));
+    const bsInp=document.getElementById('bridgeSearch');
+    if(bsInp&&!bsInp.dataset.wired){ bsInp.dataset.wired='1';
+      bsInp.addEventListener('input',e=>{ const q=e.target.value.trim().toLowerCase();
+        btb.querySelectorAll('tr').forEach(tr=>tr.style.display=(tr.dataset.s||'').toLowerCase().includes(q)?'':'none'); });
+    }
+  }
   tb.querySelectorAll('tr[data-code]').forEach(tr=>tr.addEventListener('click',()=>{
     document.querySelector('.nav button[data-page="map"]').click();
     setTimeout(()=>selectRoad(tr.dataset.code), 120);
   }));
-  // คลิกสะพานชุมชน -> เปิดหน้าประวัติ แท็บสรุปรายสายของสะพานนั้น
-  tb.querySelectorAll('tr[data-code-br]').forEach(tr=>tr.addEventListener('click',()=>{
-    histRoadCode=tr.dataset.codeBr;
-    document.querySelector('.nav button[data-page="history"]').click();
-    document.querySelector('.subtabs button[data-ht="road"]').click();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }));
+
 }
 document.getElementById('roadSearch').addEventListener('input', e=>{
   const q = e.target.value.trim().toLowerCase();
@@ -1180,7 +1205,7 @@ function applyMuadFilter(){
 function renderMapList(q){
   const rowsByCode = Object.fromEntries(EMB.roads.map(r=>[r.code,r]));
   const el2 = document.getElementById('mapRoadList');
-  el2.innerHTML = ALL_CODES
+  el2.innerHTML = [...ALL_CODES].sort((a,b)=>SUF3(a)-SUF3(b)||a.localeCompare(b,'th'))
     .filter(c=>{ const r=rowsByCode[c];
       if(M&&M.muadFilter && r?.muad!==M.muadFilter) return false;
       return (c+' '+(r?.name||'')+' '+(r?.amphoe||'')).toLowerCase().includes(q); })
@@ -1239,8 +1264,7 @@ async function loadHistory(force){
         const contract=S(o.contract);
         const hasAny=Object.values(o).some(v=>S(v)!=='');
         if(!contract){ if(hasAny) drop++; return; } // ตาม query Excel: นับเฉพาะแถวที่มีเลขที่สัญญา
-        const code=extractRoadCode(o.roadFull);
-        if(!code) return;
+        const code=extractRoadCode(o.roadFull)||null; // งานอาคาร/งานที่ไม่ผูกสายทาง -> null (นับในภาพรวม ไม่ขึ้นรายสาย)
         const year=yearFromContract(contract)||tabYear;
         if(!year) return; // tab แรกของไฟล์ที่ไม่รู้ปี: ต้องอ่านปีจากเลขที่สัญญาเท่านั้น
         let bt=S(o.budgetType)||'ไม่ระบุ';
@@ -1301,7 +1325,7 @@ async function loadHistory(force){
     const yrsFound=[...new Set(all.map(x=>x.year))].sort();
     document.getElementById('histPills').innerHTML=
       `<span class="hpill"><span class="dot live"></span> ข้อมูลสดจาก Google Sheets</span>`+
-      `<span class="hpill">▤ ${all.length} โครงการ · ${new Set(all.map(x=>x.code)).size} สาย</span>`+
+      `<span class="hpill">▤ ${all.length} โครงการ · ${new Set(all.map(x=>x.code).filter(Boolean)).size} สาย</span>`+
       `<span class="hpill">📅 พบ ${okTabs} แท็บ · ปี ${yrsFound[0]}–${yrsFound[yrsFound.length-1]}</span>`+
       `<span class="hpill">🕐 ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.</span>`;
     renderHistory();
@@ -1335,7 +1359,6 @@ function renderHistory(){
   const hR=H.filter(x=>segKmType(x,'r')>0||(!isElectric(x)&&!histIsBridge(x)&&!x.segs.length));
   const hE=H.filter(x=>poleCount(x)>0||(isElectric(x)&&!x.segs.length));
   const hB=H.filter(x=>segKmType(x,'b')>0||(histIsBridge(x)&&!isElectric(x)&&!x.segs.length));
-  const kico=(ico,bg,lbl,val,foot)=>`<div class="card kpi iko"><div class="kico" style="background:${bg}">${ico}</div><div style="min-width:0"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="foot">${foot}</div></div></div>`;
   document.getElementById('histBody').innerHTML=`
     <div class="grid kpis kpi3">
       ${kico('📋','#edf2fa','โครงการ/สัญญา', `${H.length} <small>รายการ</small>`, `ปี ${years[0]}–${years[years.length-1]}`)}
@@ -1402,7 +1425,7 @@ function renderHistory(){
   // วงเงินต่อปี แยกชนิดงบ — แสดงครบทุกชนิด (สีคงที่ตามลำดับวงเงินรวม)
   const typeAmt={}; H.forEach(x=>typeAmt[x.budgetType]=(typeAmt[x.budgetType]||0)+(x.amount||0));
   const allTypes=Object.entries(typeAmt).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-  const TCOLOR=colorByOrder(allTypes);
+  const TCOLOR=btColorMap(allTypes); // สีตายตัวตามชนิดงบ
   const yearTot=years.map(y=>H.filter(x=>x.year===y).reduce((a,x)=>a+(x.amount||0),0));
   vbar('chHistType', years.map(String),
     allTypes.map(g=>{
@@ -1429,11 +1452,18 @@ function renderHistory(){
     }).filter(Boolean),
     {unit:'ลบ.', stacked:true, height:330});
   // กิจกรรมใช้งบมากสุด
-  const byAct={}; H.forEach(x=>{ const k=x.activity||'ไม่ระบุ'; byAct[k]=byAct[k]||{amt:0,n:0}; byAct[k].amt+=(x.amount||0); byAct[k].n++; });
+  const byAct={}; H.forEach(x=>{ const k=x.activity||'ไม่ระบุ'; byAct[k]=byAct[k]||{amt:0,n:0,bt:{}}; byAct[k].amt+=(x.amount||0); byAct[k].n++; byAct[k].bt[x.budgetType]=(byAct[k].bt[x.budgetType]||0)+(x.amount||0); });
   const topAct=Object.entries(byAct).sort((a,b)=>b[1].amt-a[1].amt).slice(0,8);
-  hbar('chHistAct', topAct.map(e=>({label:e[0], v:+(e[1].amt/1e6).toFixed(1), tip:`${fmt(e[1].amt)} บาท · ${e[1].n} โครงการ`})), {unit:'ลบ.', labelW:230, height:330});
+  hbar('chHistAct', topAct.map(e=>{
+    const domBt=Object.entries(e[1].bt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'';
+    return {label:e[0], v:+(e[1].amt/1e6).toFixed(1), color:TCOLOR[domBt]||btColor(domBt)||C.teal,
+      tip:`${fmt(e[1].amt)} บาท · ${e[1].n} โครงการ · ชนิดงบหลัก: ${esc(domBt)||'-'}`};}), {unit:'ลบ.', labelW:230, height:330});
+  (()=>{ const box=document.getElementById('chHistAct'); const lg=document.createElement('div'); lg.className='legendrow';
+    const used=[...new Set(topAct.map(e=>Object.entries(e[1].bt).sort((a,b)=>b[1]-a[1])[0]?.[0]||''))].filter(Boolean);
+    lg.innerHTML=used.map(t=>`<span class="lg"><span class="sw" style="background:${TCOLOR[t]||btColor(t)||C.teal}"></span>${esc(t)}</span>`).join('');
+    box.appendChild(lg); })();
   // สายทางได้งบสะสมสูงสุด
-  const byRd={}; H.forEach(x=>{ byRd[x.code]=byRd[x.code]||{amt:0,n:0}; byRd[x.code].amt+=(x.amount||0); byRd[x.code].n++; });
+  const byRd={}; H.forEach(x=>{ if(!x.code) return; byRd[x.code]=byRd[x.code]||{amt:0,n:0}; byRd[x.code].amt+=(x.amount||0); byRd[x.code].n++; });
   const topRd=Object.entries(byRd).sort((a,b)=>b[1].amt-a[1].amt).slice(0,10);
   hbar('chHistRoad', topRd.map(e=>({label:e[0], v:+(e[1].amt/1e6).toFixed(1), color:muadColor(roadMuad[e[0]]), tip:`${fmt(e[1].amt)} บาท · ${e[1].n} โครงการ · หมวด${roadMuad[e[0]]||'-'}`})), {unit:'ลบ.', labelW:76});
   const byC={}; H.forEach(x=>{ if(x.contractor){ byC[x.contractor]=byC[x.contractor]||{amt:0,n:0}; byC[x.contractor].amt+=(x.amount||0); byC[x.contractor].n++; } });
@@ -1446,10 +1476,10 @@ function renderHistory(){
   const renderTbl=()=>{
     const q=(document.getElementById('histSearch').value||'').toLowerCase();
     const byRoad={};
-    H.forEach(x=>{ (byRoad[x.code]=byRoad[x.code]||[]).push(x); });
+    H.forEach(x=>{ if(x.code) (byRoad[x.code]=byRoad[x.code]||[]).push(x); });
     document.querySelector('#histTable tbody').innerHTML = Object.entries(byRoad)
       .map(([code,list])=>({code, list, amt:list.reduce((a,x)=>a+(x.amount||0),0)}))
-      .sort((a,b)=>b.list.length-a.list.length||b.amt-a.amt)
+      .sort((a,b)=>((roadInfoH[a.code]?0:1)-(roadInfoH[b.code]?0:1))||SUF3(a.code)-SUF3(b.code)||a.code.localeCompare(b.code,'th'))
       .filter(({code})=>{ const r=roadInfoH[code];
         return (code+' '+(r?.name||'')).toLowerCase().includes(q); })
       .map(({code,list,amt})=>{
@@ -1494,7 +1524,7 @@ function renderHistRoad(code){
   const H=histData;
   const roadInfo=Object.fromEntries(EMB.roads.map(r=>[r.code,r]));
   const byRoad={};
-  H.forEach(x=>{ (byRoad[x.code]=byRoad[x.code]||[]).push(x); });
+  H.forEach(x=>{ if(x.code) (byRoad[x.code]=byRoad[x.code]||[]).push(x); });
   // รวมสายจาก Zerobase ด้วย — สรุปรายสายอันเดียวเห็นครบ อดีต+อนาคต
   const zbByRoad={};
   (zbData||[]).forEach(x=>{ (zbByRoad[x.code]=zbByRoad[x.code]||[]).push(x); });
@@ -1573,7 +1603,7 @@ function renderHistRoad(code){
       </div>`; })():''}
     ${bridge?'':`<div class="card" style="margin-top:14px">
       <h3>แผนภาพช่วงดำเนินการ (Strip Map)</h3>
-      <div class="note">อดีต → อนาคต ในภาพเดียว: แถวบน = ครอบคลุมรวม · เลนสีตามปีงบ = งานที่ทำไปแล้ว · เลนล่าง = <span style="color:#e87ba4;font-weight:600">คำของบ</span> (กำลังเสนอ) และ <span style="color:#e34948;font-weight:600">Zerobase</span> (ความต้องการจริง) · ▲ = สะพาน — ชี้เพื่อดูรายละเอียด${noSeg?` · ⚠ ${noSeg} โครงการไม่ได้ระบุช่วง กม. (ดูในตาราง)`:''}</div>
+      <div class="note">ชี้ที่แถบเพื่อดูรายละเอียด${noSeg?` · ⚠ ${noSeg} โครงการไม่ได้ระบุช่วง กม. (ดูในตาราง)`:''}</div>
       <div class="stripwrap" id="hrStrip"></div>
     </div>`}
     <div class="card" style="margin-top:14px">
@@ -1811,7 +1841,7 @@ function renderRequests(){
   // โดนัทชนิดงบ — ครบทุกชนิด
   const byCat={}; Q.forEach(r=>{ byCat[r.cat]=byCat[r.cat]||{n:0,amt:0}; byCat[r.cat].n++; byCat[r.cat].amt+=(r.amt||0); });
   const cats=Object.entries(byCat).sort((a,b)=>b[1].n-a[1].n);
-  const CATCOLOR=colorByOrder(cats.map(c=>c[0]).filter(c=>c!=='— ไม่ระบุ'));
+  const CATCOLOR=btColorMap(cats.map(c=>c[0]).filter(c=>c!=='— ไม่ระบุ'));
   CATCOLOR['— ไม่ระบุ']='#9aa5a3';
   donut('chReqCat', cats.map(c=>({label:c[0], v:c[1].n, color:CATCOLOR[c[0]]})), {unit:'คำขอ', height:300});
   // คำขอแยกตามหมวด (stacked hbar ตามชนิดงบ)
@@ -2015,7 +2045,7 @@ function renderZbOverview(){
       <div class="tblwrap" style="max-height:520px"><table id="zbRoadTable"><thead><tr>
         <th>รหัส</th><th>ชื่อสายทาง</th><th>หมวด</th>${all?'<th>ปีที่ขอ</th>':''}<th class="num">ระยะทางสาย (กม.)</th><th class="num">จำนวนคำขอ</th><th class="num">ถนน (กม.)</th><th class="num">ไฟฟ้า (ต้น)</th><th class="num">สะพาน (ม.)</th><th class="num">% ของสาย</th><th>กลุ่มกิจกรรม</th>
       </tr></thead><tbody></tbody></table></div>
-      <div class="footnote">คำขอที่ไม่ระบุช่วง กม. นับใน "จำนวนคำขอ" แต่ไม่คิดปริมาณ/แผนภาพ</div>
+
     </div>`;
   // กราฟกลุ่มกิจกรรม
   const byG=ZB_GROUPS.map(g=>{const rr=R.filter(r=>r.g===g);
