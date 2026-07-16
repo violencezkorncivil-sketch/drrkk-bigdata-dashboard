@@ -361,6 +361,7 @@ select.search{width:auto}
           <b>กติกาการอ่าน:</b><br>
           • นับเฉพาะแถวที่มี <b>เลขที่สัญญา</b> — แถวที่ยังไม่กรอกจะถูกตัดออก (ขึ้นจำนวนที่ตัดในหน้านี้)<br>
           • นับเฉพาะ <b>ประเภทงบ "ก่อสร้าง"</b> — ประเภทอื่นถูกคัดออกทั้งแถว (แถวที่เว้นว่างคอลัมน์นี้ยังนับตามปกติ)<br>
+          • <b>งานอาคาร:</b> ช่องรหัสสายทางใส่ชื่อหน่วยแทน เช่น <code>ขทช.ขก.</code> = แขวงฯ · <code>บทช.น้ำพอง</code> = หมวดน้ำพอง (บทช.ขอนแก่น = หมวดเมือง) — การ์ดงานอาคารจัดกลุ่มตามนี้อัตโนมัติ<br>
           • <b>ปีงบ</b> อ่านจากเลข 4 ตัวท้ายของเลขที่สัญญา เช่น "15/2567" = ปี 2567 (ถ้าไม่มีใช้ปีของ tab)<br>
           • <b>รหัสสายทาง</b> ขอแค่มี ขก.xxxx อยู่ในเซลล์ (มีข้อความอื่นปนได้) รองรับ ขก/กส/ชย/รอ<br>
           • <b>ช่วง กม.</b> รูปแบบ 1+000 หลายช่วงในเซลล์เดียวได้ (คั่นด้วยจุลภาค/บรรทัดใหม่)<br>
@@ -873,7 +874,25 @@ const SUF3=c=>{ const d=(String(c).split('.')[1]||''); return parseInt(d.slice(-
 const BT_COLOR=[['ยกระดับ','#eb6834'],['บำรุง','#2a78d6'],['ปลอดภัย','#008300'],['จังหวัด','#e34948'],['วิจัย','#d9a441'],['สะพาน','#8a8f98'],['อาคาร','#4a3aa7'],['พระราชดำริ','#0d9488'],['ซ่อม','#e87ba4']];
 const btColor=t=>{ const hit=BT_COLOR.find(([k])=>String(t).includes(k)); return hit?hit[1]:null; };
 const btColorMap=names=>{ const o={}; let fb=0; names.forEach(n=>{ o[n]=btColor(n)||CAT8[(fb++)%8]; }); return o; };
-const catName=t=>String(t).replace(/^\s*\d+[\.\)]\s*/,''); // "6.ปลอดภัย" -> "ปลอดภัย" 
+const catName=t=>String(t).replace(/^\s*\d+[\.\)]\s*/,''); // "6.ปลอดภัย" -> "ปลอดภัย"
+/* หมวดของเรคคอร์ดประวัติ: 1) รหัสสาย/สะพาน -> บัญชี Master/สะพาน 2) งานอาคาร/ไม่ผูกสาย -> อ่านหน่วยจากช่องรหัสสายทาง (ขทช.=แขวงฯ · บทช.=หมวด) */
+let _MBC=null;
+const muadByCode=()=>_MBC||(_MBC={...Object.fromEntries(Object.values(EMB.bridges||{}).map(b=>[b.code,b.muad])),
+  ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))});
+function recMuad(x){
+  if(x.code&&muadByCode()[x.code]) return muadByCode()[x.code];
+  const t=(x.roadFull||'')+' '+(x.agency||'')+' '+(x.activity||'');
+  if(/บทช/.test(t)){
+    const m=MUAD_ORDER.find(mm=>t.includes(mm));
+    if(m) return m;
+    if(/ขอนแก่น|ขก/.test(t)) return 'เมือง'; // บทช.ขอนแก่น = หมวดเมือง
+  }
+  if(/ขทช|แขวง/.test(t)) return 'แขวงฯ';
+  const m=MUAD_ORDER.find(mm=>t.includes(mm));
+  return m||'ไม่ระบุ';
+}
+const recMuadColor=m=>m==='แขวงฯ'?'#1B2A4A':(m==='ไม่ระบุ'?'#9aa5a3':muadColor(m));
+const recMuadLabel=m=>(m==='แขวงฯ'||m==='ไม่ระบุ')?m:'หมวด'+m;
 const PROVINCE = {'ขก':'ขอนแก่น','กส':'กาฬสินธุ์','ชย':'ชัยภูมิ','รอ':'ร้อยเอ็ด'};
 
 function renderOverview(){
@@ -954,7 +973,7 @@ function renderOverviewBudget(){
     ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))}; // สะพานชุมชนใช้หมวดจากบัญชีสะพาน
   const bM={}, bR={}, bT={};
   H.forEach(x=>{
-    const m=roadMuad[x.code]||'ไม่ระบุ';
+    const m=recMuad(x);
     bM[m]=(bM[m]||0)+x.amount;
     if(x.code) bR[x.code]=(bR[x.code]||0)+x.amount;
     bT[x.budgetType]=(bT[x.budgetType]||0)+x.amount;
@@ -967,7 +986,7 @@ function renderOverviewBudget(){
     </div>`;
   const mPairs=Object.entries(bM).sort((a,b)=>b[1]-a[1]);
   const mTot=mPairs.reduce((a,p)=>a+p[1],0)||1;
-  hbar('chBudMuad', mPairs.map(p=>({label:p[0]==='ไม่ระบุ'?p[0]:'หมวด'+p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(p[0]),
+  hbar('chBudMuad', mPairs.map(p=>({label:recMuadLabel(p[0]), v:+(p[1]/1e6).toFixed(1), color:recMuadColor(p[0]),
     tip:`${fmt(p[1])} บาท (${(100*p[1]/mTot).toFixed(1)}%)`})), {labelW:96, showVal:false});
   const rPairs=Object.entries(bR).sort((a,b)=>b[1]-a[1]).slice(0,10);
   hbar('chBudRoad', rPairs.map(p=>({label:p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(roadMuad[p[0]]),
@@ -1329,7 +1348,7 @@ async function loadHistory(force){
           const lbl=q.lbl||p.lbl;
           return {a:kmVal(p.km), b:kmVal(q.km), t:segTypeOf(lbl,projType), lbl:lbl||null};
         }).filter(s=>s.a!=null&&s.b!=null&&s.b>s.a);
-        recs.push({year, code, contract,
+        recs.push({year, code, contract, roadFull:S(o.roadFull),
           budgetType:bt,
           activity:S(o.activity)||S(o.worktype), start:S(o.start), end:S(o.end),
           amount:typeof o.amount==='number'?o.amount:num(o.amount),
@@ -1500,10 +1519,18 @@ function renderHistory(){
     const box=document.getElementById('chBuilding'); if(!box) return;
     const hBld=H.filter(histIsBuilding);
     const unitOf=x=>{
-      const t=(x.activity||'')+' '+(x.agency||'');
+      // หน่วยอยู่ในช่อง "รหัสสายทาง" เช่น ขทช.ขก. (แขวงฯ) / บทช.น้ำพอง (หมวด)
+      const rf=x.roadFull||'';
+      const t=rf+' '+(x.agency||'')+' '+(x.activity||'');
+      if(/บทช/.test(rf)||/บทช/.test(t)){
+        const m=MUAD_ORDER.find(mm=>t.includes(mm));
+        if(m) return 'หมวด'+m;
+        if(/ขอนแก่น|ขก/.test(t)) return 'หมวดเมือง'; // บทช.ขอนแก่น = หมวดเมือง
+        return 'หมวด (บทช.)';
+      }
+      if(/ขทช|แขวง/.test(t)) return 'แขวงฯ';
       const m=MUAD_ORDER.find(mm=>t.includes(mm));
       if(m) return 'หมวด'+m;
-      if(/แขวง/.test(t)) return 'แขวงฯ';
       return 'ไม่ระบุหน่วย';
     };
     const byU={};
@@ -1555,13 +1582,13 @@ function renderHistory(){
   const roadMuad={...Object.fromEntries(Object.values(EMB.bridges||{}).map(b=>[b.code,b.muad])),
     ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))}; // สะพานชุมชนใช้หมวดจากบัญชีสะพาน
   (()=>{
-    const muadsUsed=[...MUAD_ORDER,'ไม่ระบุ'].filter(m=>H.some(x=>(roadMuad[x.code]||'ไม่ระบุ')===m));
+    const muadsUsed=[...MUAD_ORDER,'แขวงฯ','ไม่ระบุ'].filter(m=>H.some(x=>recMuad(x)===m));
     hstack('chHistMuad', years.map(y=>{
         const inY=H.filter(x=>x.year===y);
         return {label:'ปี '+y,
-          segs:Object.fromEntries(muadsUsed.map(m=>[m, +(inY.filter(x=>(roadMuad[x.code]||'ไม่ระบุ')===m).reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1)])),
+          segs:Object.fromEntries(muadsUsed.map(m=>[m, +(inY.filter(x=>recMuad(x)===m).reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1)])),
           right:`รวม ${fmt(+(inY.reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1))} ลบ. · ${inY.length} โครงการ`};}),
-      muadsUsed.map(m=>({k:m, label:'หมวด'+m, color:m==='ไม่ระบุ'?'#9aa5a3':muadColor(m)})), {unit:'ลบ.', labelW:66});
+      muadsUsed.map(m=>({k:m, label:recMuadLabel(m), color:recMuadColor(m)})), {unit:'ลบ.', labelW:66});
   })();
   // กิจกรรมใช้งบมากสุด
   const byAct={}; H.forEach(x=>{ const k=x.activity||'ไม่ระบุ'; byAct[k]=byAct[k]||{amt:0,n:0,bt:{}}; byAct[k].amt+=(x.amount||0); byAct[k].n++; byAct[k].bt[x.budgetType]=(byAct[k].bt[x.budgetType]||0)+(x.amount||0); });
