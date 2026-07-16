@@ -616,32 +616,35 @@ function donut(container, slices, {unit='กม.', height=280}={}){
   lg.innerHTML=slices.map(s=>`<span class="lg"><span class="sw" style="background:${s.color}"></span>${esc(s.label.length>22?s.label.slice(0,22)+'…':s.label)}</span>`).join('');
   box.appendChild(lg);
 }
-/* stacked horizontal bars — 1 แถวต่อกลุ่ม แบ่งท่อนตามชนิด + ป้ายขวา */
+/* stacked horizontal bars — มาตรฐาน: ไม่มีป้ายท้ายแถว ชี้แถว/ท่อนแล้วรายละเอียด+% ค่อยขึ้น · legend ชื่อล้วนไม่มีเลขนำหน้า */
 function hstack(container, rows, segsOrder, {unit='คำขอ', labelW=112}={}){
   const box=document.getElementById(container); box.innerHTML='';
-  const W=box.clientWidth||560, rowH=34, padT=6, rightW=150;
+  const W=box.clientWidth||560, rowH=34, padT=6, rightW=14;
   const H=rows.length*rowH+padT+6;
   const svg=el('svg',{class:'viz',viewBox:`0 0 ${W} ${H}`,width:'100%',height:H},box);
   const max=Math.max(...rows.map(r=>segsOrder.reduce((a,s)=>a+(r.segs[s.k]||0),0)),0.0001);
-  const plotW=W-labelW-rightW-14;
+  const plotW=W-labelW-rightW;
   rows.forEach((row,i)=>{
     const y=padT+i*rowH, bh=16, by=y+(rowH-bh)/2;
-    const t=el('text',{class:'cattext',x:labelW-8,y:by+bh/2+4,'text-anchor':'end'},svg);
+    const totRow=segsOrder.reduce((a,s)=>a+(row.segs[s.k]||0),0);
+    // ชี้ตรงไหนของแถวก็ได้ -> สรุปของแถว
+    const hit=el('rect',{x:0,y:y,width:W,height:rowH,fill:'transparent'},svg);
+    hit.addEventListener('mousemove',e=>showTip(`<b>${esc(catName(row.label))}</b><br>${row.right?esc(row.right):fmt(totRow)+' '+unit}`,e.clientX,e.clientY));
+    hit.addEventListener('mouseleave',hideTip);
+    const t=el('text',{class:'cattext',x:labelW-8,y:by+bh/2+4,'text-anchor':'end','pointer-events':'none'},svg);
     t.textContent=row.label.length>14?row.label.slice(0,14)+'…':row.label;
     let x=labelW;
-    const totRow=segsOrder.reduce((a,s)=>a+(row.segs[s.k]||0),0);
     segsOrder.forEach(s=>{
       const v=row.segs[s.k]||0; if(v<=0) return;
       const w=plotW*v/max;
       const rect=el('rect',{class:'bar',x:x,y:by,width:Math.max(1,w-2),height:bh,rx:3,fill:s.color},svg);
-      rect.addEventListener('mousemove',e=>showTip(`<b>${esc(row.label)}</b><br>${esc(s.label)} ${fmt(v)} ${unit} (${(100*v/totRow).toFixed(0)}%)`,e.clientX,e.clientY));
+      rect.addEventListener('mousemove',e=>showTip(`<b>${esc(catName(row.label))} · ${esc(catName(s.label))}</b><br>${fmt(v)} ${unit} (${(100*v/totRow).toFixed(0)}%)${row.right?`<br><span style="color:#c8d2e4;font-size:11px">${esc(row.right)}</span>`:''}`,e.clientX,e.clientY));
       rect.addEventListener('mouseleave',hideTip);
       x+=w;
     });
-    el('text',{class:'vallabel',x:x+8,y:by+bh/2+4},svg).textContent=row.right??fmt(totRow)+' '+unit;
   });
   const lg=document.createElement('div'); lg.className='legendrow';
-  lg.innerHTML=segsOrder.map(s=>`<span class="lg"><span class="sw" style="background:${s.color}"></span>${esc(s.label)}</span>`).join('');
+  lg.innerHTML=segsOrder.map(s=>`<span class="lg"><span class="sw" style="background:${s.color}"></span>${esc(catName(s.label))}</span>`).join('');
   box.appendChild(lg);
 }
 /* ---- วันที่ไทย: normalize ปีให้เป็น ค.ศ. ไม่ว่าจะกรอก/ถูก Google ตีความมาแบบไหน ----
@@ -870,6 +873,7 @@ const SUF3=c=>{ const d=(String(c).split('.')[1]||''); return parseInt(d.slice(-
 const BT_COLOR=[['ยกระดับ','#eb6834'],['บำรุง','#2a78d6'],['ปลอดภัย','#008300'],['จังหวัด','#e34948'],['วิจัย','#d9a441'],['สะพาน','#8a8f98'],['อาคาร','#4a3aa7'],['พระราชดำริ','#0d9488'],['ซ่อม','#e87ba4']];
 const btColor=t=>{ const hit=BT_COLOR.find(([k])=>String(t).includes(k)); return hit?hit[1]:null; };
 const btColorMap=names=>{ const o={}; let fb=0; names.forEach(n=>{ o[n]=btColor(n)||CAT8[(fb++)%8]; }); return o; };
+const catName=t=>String(t).replace(/^\s*\d+[\.\)]\s*/,''); // "6.ปลอดภัย" -> "ปลอดภัย" 
 const PROVINCE = {'ขก':'ขอนแก่น','กส':'กาฬสินธุ์','ชย':'ชัยภูมิ','รอ':'ร้อยเอ็ด'};
 
 function renderOverview(){
@@ -918,7 +922,9 @@ function renderOverview(){
     surfKeys.map(([lb,,col])=>({k:lb,label:lb,color:col})), {unit:'กม.'});
 
   const pairs = muads.map(m=>['หมวด'+m, byM[m].km]).filter(p=>p[1]>0).sort((a,b)=>b[1]-a[1]);
-  hbar('chAmphoe', pairs.map(p=>({label:p[0], v:+p[1].toFixed(2)})), {unit:'กม.', height:300});
+  hbar('chAmphoe', pairs.map(p=>({label:p[0], v:+p[1].toFixed(2), color:muadColor(p[0].replace('หมวด','')),
+    tip:`${fmt(+p[1].toFixed(2))} กม. (${(100*p[1]/totKm).toFixed(1)}% ของโครงข่าย)`})),
+    {unit:'กม.', height:300, showVal:false});
 
   donut('chSurface', [
     {label:'ลาดยาง', v:+lat.toFixed(1), color:'#52525b'},
@@ -960,7 +966,9 @@ function renderOverviewBudget(){
       <div><h3 style="font-size:13px">งบแยกตามชนิดงบ</h3><div id="chBudType"></div></div>
     </div>`;
   const mPairs=Object.entries(bM).sort((a,b)=>b[1]-a[1]);
-  hbar('chBudMuad', mPairs.map(p=>({label:p[0]==='ไม่ระบุ'?p[0]:'หมวด'+p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(p[0]), tip:fmt(p[1])+' บาท'})), {labelW:96});
+  const mTot=mPairs.reduce((a,p)=>a+p[1],0)||1;
+  hbar('chBudMuad', mPairs.map(p=>({label:p[0]==='ไม่ระบุ'?p[0]:'หมวด'+p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(p[0]),
+    tip:`${fmt(p[1])} บาท (${(100*p[1]/mTot).toFixed(1)}%)`})), {labelW:96, showVal:false});
   const rPairs=Object.entries(bR).sort((a,b)=>b[1]-a[1]).slice(0,10);
   hbar('chBudRoad', rPairs.map(p=>({label:p[0], v:+(p[1]/1e6).toFixed(1), color:muadColor(roadMuad[p[0]]),
     tip:`${fmt(p[1])} บาท · หมวด${roadMuad[p[0]]||'-'}`})), {labelW:70});
@@ -1429,7 +1437,7 @@ function renderHistory(){
           <div class="kico" style="background:#e6f4f2;width:44px;height:44px;border-radius:12px;font-size:22px">🏛️</div>
           <div style="flex:1;min-width:0">
             <h3 style="margin-bottom:2px">หน่วยดำเนินการ</h3>
-            <div class="note">วงเงิน (ลบ.) · จำนวนโครงการ ของแต่ละหน่วย</div>
+            <div class="note">แถวละปี แท่งซ้อนแบ่งตามหน่วย (ลบ.) — ชี้ท่อนเพื่อดูรายละเอียดและ %</div>
             <div id="chAgency"></div>
           </div>
         </div>
@@ -1450,7 +1458,7 @@ function renderHistory(){
       <div class="card"><h3>วงเงินต่อปี แยกตามชนิดงบ (ครบทุกชนิด)</h3><div class="note">ล้านบาท — ชี้ที่แท่งเพื่อดูจำนวนโครงการและ % ของปีนั้น</div><div id="chHistType"></div></div>
     </div>
     <div class="grid two" style="margin-top:14px">
-      <div class="card"><h3>วงเงินต่อปี แยกตามหมวดบำรุงทาง</h3><div class="note">ล้านบาท — งบลงหมวดไหนปีไหน</div><div id="chHistMuad"></div></div>
+      <div class="card"><h3>วงเงินต่อปี แยกตามหมวดบำรุงทาง</h3><div class="note">แถวละปี แท่งซ้อนแบ่งตามหมวด (ลบ.) — ชี้ท่อนเพื่อดูรายละเอียดและ %</div><div id="chHistMuad"></div></div>
       <div class="card"><h3>กิจกรรมที่ใช้งบมากที่สุด</h3><div class="note">ล้านบาทสะสม — ชี้เพื่อดูจำนวนโครงการ</div><div id="chHistAct"></div></div>
     </div>
     <div class="grid two" style="margin-top:14px">
@@ -1476,14 +1484,16 @@ function renderHistory(){
       return t.slice(0,22);
     };
     const byA={};
-    H.forEach(x=>{ const u=agencyOf(x); byA[u]=byA[u]||{n:0,amt:0}; byA[u].n++; byA[u].amt+=(x.amount||0); });
-    const rows=Object.entries(byA).sort((a,b)=>b[1].amt-a[1].amt);
-    hbar('chAgency', rows.map(([u,d])=>({
-      label:u, v:+(d.amt/1e6).toFixed(1),
-      valText:`${fmt(+(d.amt/1e6).toFixed(1))} ลบ. · ${d.n} งาน`,
-      color:u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):(u==='ไม่ระบุ'?'#9aa5a3':C.teal)),
-      tip:`${d.n} โครงการ · ${fmt(d.amt)} บาท`})),
-      {unit:'ลบ.', labelW:110, valW:140, height:Math.max(140, rows.length*38+40)});
+    H.forEach(x=>{ const u=agencyOf(x); byA[u]=byA[u]||{n:0,amt:0,y:{},c:{}}; byA[u].n++; byA[u].amt+=(x.amount||0);
+      byA[u].y[x.year]=(byA[u].y[x.year]||0)+(x.amount||0); byA[u].c[x.year]=(byA[u].c[x.year]||0)+1; });
+    const units=Object.entries(byA).sort((a,b)=>b[1].amt-a[1].amt).map(e=>e[0]);
+    let fb=0;
+    const uColor=u=>u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):(u==='ไม่ระบุ'?'#9aa5a3':CAT8[(fb++)%8]));
+    const uc=Object.fromEntries(units.map(u=>[u,uColor(u)]));
+    hstack('chAgency', years.map(y=>({label:'ปี '+y,
+        segs:Object.fromEntries(units.map(u=>[u, +((byA[u].y[y]||0)/1e6).toFixed(1)])),
+        right:`รวม ${fmt(+(H.filter(x=>x.year===y).reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1))} ลบ. · ${H.filter(x=>x.year===y).length} โครงการ`})),
+      units.map(u=>({k:u, label:u, color:uc[u]})), {unit:'ลบ.', labelW:66});
   })();
   // ---- งานอาคาร แยกตามหน่วย (แขวงฯ / หมวด) ----
   (()=>{
@@ -1497,12 +1507,14 @@ function renderHistory(){
       return 'ไม่ระบุหน่วย';
     };
     const byU={};
-    hBld.forEach(x=>{ const u=unitOf(x); byU[u]=byU[u]||{n:0,amt:0,eg:[]}; byU[u].n++; byU[u].amt+=(x.amount||0); if(byU[u].eg.length<3) byU[u].eg.push((x.activity||'').slice(0,36)); });
-    hbar('chBuilding', Object.entries(byU).sort((a,b)=>b[1].amt-a[1].amt).map(([u,d])=>({
-      label:u, v:+(d.amt/1e6).toFixed(2),
-      color:u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):'#9aa5a3'),
-      tip:`${d.n} โครงการ · ${fmt(d.amt)} บาท<br><span style="font-size:11px">${d.eg.map(esc).join(' · ')}</span>`})),
-      {unit:'ลบ.', labelW:110, height:Math.max(120, Object.keys(byU).length*40+40)});
+    hBld.forEach(x=>{ const u=unitOf(x); byU[u]=byU[u]||{n:0,amt:0,y:{},c:{}}; byU[u].n++; byU[u].amt+=(x.amount||0);
+      byU[u].y[x.year]=(byU[u].y[x.year]||0)+(x.amount||0); byU[u].c[x.year]=(byU[u].c[x.year]||0)+1; });
+    const bUnits=Object.entries(byU).sort((a,b)=>b[1].amt-a[1].amt).map(e=>e[0]);
+    const bYears=years.filter(y=>hBld.some(x=>x.year===y));
+    hstack('chBuilding', bYears.map(y=>({label:'ปี '+y,
+        segs:Object.fromEntries(bUnits.map(u=>[u, +((byU[u].y[y]||0)/1e6).toFixed(2)])),
+        right:`รวม ${fmt(+(hBld.filter(x=>x.year===y).reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(2))} ลบ. · ${hBld.filter(x=>x.year===y).length} งาน`})),
+      bUnits.map(u=>({k:u, label:u, color:u==='แขวงฯ'?C.navy:(u.startsWith('หมวด')?muadColor(u.replace('หมวด','')):'#9aa5a3')})), {unit:'ลบ.', labelW:66});
   })();
   // ชี้ที่ช่อง "ปริมาณงานสะสม" -> โชว์รายชื่อโครงการที่ประกอบเป็นตัวเลข (ตรวจสอบย้อนกลับได้)
   const tileTip=(items,fq,title)=>{
@@ -1539,27 +1551,18 @@ function renderHistory(){
         })};
     }),
     {unit:'ลบ.', stacked:true, height:330});
-  // วงเงินต่อปี แยกหมวด
+  // วงเงินแยกตามหมวด -> แถวละหมวด แท่งซ้อนรายปี (มาตรฐานเดียวกับคำขอแยกหมวด)
   const roadMuad={...Object.fromEntries(Object.values(EMB.bridges||{}).map(b=>[b.code,b.muad])),
     ...Object.fromEntries(EMB.roads.map(r=>[r.code,r.muad]))}; // สะพานชุมชนใช้หมวดจากบัญชีสะพาน
-  const muadsAll=[...MUAD_ORDER, 'ไม่ระบุ'];
-  vbar('chHistMuad', years.map(String),
-    muadsAll.map(m=>{
-      const amts=years.map(y=>H.filter(x=>x.year===y&&(roadMuad[x.code]||'ไม่ระบุ')===m).reduce((a,x)=>a+(x.amount||0),0));
-      if(amts.every(a=>a===0)) return null;
-      return {label:'หมวด'+m, color:m==='ไม่ระบุ'?'#c2beb6':muadColor(m),
-        data:amts.map(a=>+(a/1e6).toFixed(1)),
-        tips:years.map((y,yi)=>{
-          const inCell=H.filter(x=>x.year===y&&(roadMuad[x.code]||'ไม่ระบุ')===m);
-          let extra='';
-          if(m==='ไม่ระบุ'&&inCell.length){
-            const cs=[...new Set(inCell.map(x=>x.code||'ไม่ผูกสายทาง'))];
-            extra=`<br><span style="font-size:11px">${cs.slice(0,6).map(esc).join(' · ')}${cs.length>6?' …':''}</span>`;
-          }
-          return `<b>ปี ${y} · หมวด${esc(m)}</b><br>วงเงิน ${fmt(amts[yi])} บาท · ${inCell.length} โครงการ${extra}`;
-        })};
-    }).filter(Boolean),
-    {unit:'ลบ.', stacked:true, height:330});
+  (()=>{
+    const muadsUsed=[...MUAD_ORDER,'ไม่ระบุ'].filter(m=>H.some(x=>(roadMuad[x.code]||'ไม่ระบุ')===m));
+    hstack('chHistMuad', years.map(y=>{
+        const inY=H.filter(x=>x.year===y);
+        return {label:'ปี '+y,
+          segs:Object.fromEntries(muadsUsed.map(m=>[m, +(inY.filter(x=>(roadMuad[x.code]||'ไม่ระบุ')===m).reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1)])),
+          right:`รวม ${fmt(+(inY.reduce((a,x)=>a+(x.amount||0),0)/1e6).toFixed(1))} ลบ. · ${inY.length} โครงการ`};}),
+      muadsUsed.map(m=>({k:m, label:'หมวด'+m, color:m==='ไม่ระบุ'?'#9aa5a3':muadColor(m)})), {unit:'ลบ.', labelW:66});
+  })();
   // กิจกรรมใช้งบมากสุด
   const byAct={}; H.forEach(x=>{ const k=x.activity||'ไม่ระบุ'; byAct[k]=byAct[k]||{amt:0,n:0,bt:{}}; byAct[k].amt+=(x.amount||0); byAct[k].n++; byAct[k].bt[x.budgetType]=(byAct[k].bt[x.budgetType]||0)+(x.amount||0); });
   const topAct=Object.entries(byAct).sort((a,b)=>b[1].amt-a[1].amt).slice(0,8);
@@ -1953,7 +1956,7 @@ function renderRequests(){
   const cats=Object.entries(byCat).sort((a,b)=>b[1].n-a[1].n);
   const CATCOLOR=btColorMap(cats.map(c=>c[0]).filter(c=>c!=='— ไม่ระบุ'));
   CATCOLOR['— ไม่ระบุ']='#9aa5a3';
-  donut('chReqCat', cats.map(c=>({label:c[0], v:c[1].n, color:CATCOLOR[c[0]]})), {unit:'คำขอ', height:300});
+  donut('chReqCat', cats.map(c=>({label:catName(c[0]), v:c[1].n, color:CATCOLOR[c[0]]})), {unit:'คำขอ', height:300});
   // คำขอแยกตามหมวด (stacked hbar ตามชนิดงบ)
   const segsOrder=cats.map(c=>({k:c[0], label:c[0], color:CATCOLOR[c[0]]}));
   const muadRows={};
