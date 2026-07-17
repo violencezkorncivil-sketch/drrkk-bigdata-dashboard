@@ -188,7 +188,7 @@ select.search{width:auto}
     <div class="brand">
       <h1>Big Data สายทาง</h1>
       <div class="sub">แขวงทางหลวงชนบทขอนแก่น<br>กรมทางหลวงชนบท</div>
-      <div class="ver">v15.5 · 15 ก.ค. 2569</div>
+      <div class="ver">v15.6 · 15 ก.ค. 2569</div>
     </div>
     <nav class="nav">
       <button data-page="overview" class="active"><span class="ico">▦</span> ภาพรวมโครงข่าย</button>
@@ -2027,8 +2027,12 @@ function drawStrip(container, roadLen, covered, list, YCOLOR, bridgesOnRoad, ext
     el('rect',{class:'lanebg',x:x0,y:by,width:plotW,height:bh,rx:4},svg);
     if(ln.noSegN && !ln.segs.length)
       el('text',{class:'kmtick',x:x0+8,y:by+bh/2+4,'font-style':'italic'},svg).textContent=ln.noSegTxt||`${ln.noSegN} โครงการ (ไม่ระบุช่วง กม.)`;
-    else if(ln.noSegN&&ln.segs.length)
-      el('text',{class:'kmtick',x:x0+plotW+2,y:by+bh/2+4,'font-style':'italic','font-size':'9.5'},svg).textContent=`+${ln.noSegN}`;
+    else if(ln.noSegN&&ln.segs.length){
+      const t=el('text',{class:'kmtick',x:x0+plotW+2,y:by+bh/2+4,'font-style':'italic','font-size':'9.5'},svg);
+      t.textContent=`+${ln.noSegN}`; t.style.cursor='help';
+      t.addEventListener('mousemove',e=>showTip(`<b>+${ln.noSegN}</b> โครงการใน "${esc(ln.label)}" ที่ไม่ระบุช่วง กม.<br>วาดตำแหน่งบนแถบไม่ได้ — ดูรายละเอียดในตารางด้านล่าง`,e.clientX,e.clientY));
+      t.addEventListener('mouseleave',hideTip);
+    }
     [...ln.segs.filter(sg=>!sg.dot), ...ln.segs.filter(sg=>sg.dot)].forEach(sg=>{
       const xa=X(sg.a), xb=X(Math.min(sg.b,roadLen));
       if(sg.dot){
