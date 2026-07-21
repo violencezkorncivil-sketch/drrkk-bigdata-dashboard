@@ -188,7 +188,7 @@ select.search{width:auto}
     <div class="brand">
       <h1>Big Data สายทาง</h1>
       <div class="sub">แขวงทางหลวงชนบทขอนแก่น<br>กรมทางหลวงชนบท</div>
-      <div class="ver">v16.9 · 21 ก.ค. 2569</div>
+      <div class="ver">v17.0 · 21 ก.ค. 2569</div>
     </div>
     <nav class="nav">
       <button data-page="overview" class="active"><span class="ico">▦</span> ภาพรวมโครงข่าย</button>
@@ -296,10 +296,16 @@ select.search{width:auto}
     <section class="page" id="pg-requests">
       <div class="pghero">
         <div class="pgh-left"><div class="pgh-ico">▥</div>
-          <div><h2>คำของบประมาณ</h2><div class="desc">คำขอ / แผนงบประมาณต่อสายทาง — สถานะที่กำลังเสนอ</div>
+          <div><h2>คำของบประมาณ</h2><div class="desc">คำขอ / แผนงบประมาณต่อสายทาง แยกรายปีงบ — สถานะที่กำลังเสนอ</div>
             <div class="pillrow" id="reqPills"><span class="hpill"><span class="dot wait"></span> กำลังดึงข้อมูล…</span></div></div>
         </div>
         <div class="pgh-right"><button class="hbtn" onclick="reloadPage()">⟳ โหลดข้อมูลใหม่</button><button class="hbtn" onclick="exportCSV()">⬇ CSV</button><button class="hbtn" onclick="printPage()">🖨 พิมพ์</button></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <span style="display:flex;align-items:center;gap:8px;flex:none">
+          <label style="font-size:12.5px;color:var(--ink2)">ปีงบ :</label>
+          <select class="search" id="reqYearSel" style="padding:5px 10px"></select>
+        </span>
       </div>
       <div id="reqBody"><div class="loading"><span class="spin"></span>กำลังดึงข้อมูลจาก Google Sheets…</div></div>
     </section>
@@ -308,16 +314,14 @@ select.search{width:auto}
     <section class="page" id="pg-zerobase">
       <div class="pghero">
         <div class="pgh-left"><div class="pgh-ico">◪</div>
-          <div><h2>Zerobase — ความต้องการ / ความชำรุดเสียหาย</h2><div class="desc">ความต้องการจริงจากพื้นที่ — เลือกดูรายปี หรือรวมทุกปี</div>
+          <div><h2>Zerobase — ความต้องการ / ความชำรุดเสียหาย</h2><div class="desc">ความต้องการจริงจากพื้นที่ — เหมารวมทุกรายการ (รายการที่ได้รับงบแล้วค่อยถอดออกจากชีท)</div>
             <div class="pillrow" id="zbPills"><span class="hpill"><span class="dot wait"></span> กำลังดึงข้อมูล…</span></div></div>
         </div>
         <div class="pgh-right"><button class="hbtn" onclick="reloadPage()">⟳ โหลดข้อมูลใหม่</button><button class="hbtn" onclick="exportCSV()">⬇ CSV</button><button class="hbtn" onclick="printPage()">🖨 พิมพ์</button></div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-        <span style="display:flex;align-items:center;gap:8px;flex:none">
-          <label style="font-size:12.5px;color:var(--ink2)">ปีงบ :</label>
-          <select class="search" id="zbYearSel" style="padding:5px 10px"></select>
-        </span>
+      <!-- Zerobase ถือเป็นคลังความต้องการเหมารวม ไม่แยกปี — ตัวเลือกปีซ่อนไว้ (ข้อมูลยังอ่านทุก tab ตามเดิม) -->
+      <div style="display:none">
+        <select id="zbYearSel"></select>
       </div>
       <div id="zbBody"><div class="loading"><span class="spin"></span>กำลังดึงข้อมูล Zerobase…</div></div>
     </section>
@@ -376,8 +380,8 @@ select.search{width:auto}
         <div class="card"><h3>แหล่งข้อมูลและวิธีอัปเดต</h3><div class="note">อะไรอัปเดตเอง อะไรต้อง rebuild — รายละเอียดเต็มดูการ์ด "คู่มืออัปเดตข้อมูล" ด้านล่าง</div>
           <table style="font-size:12.5px"><thead><tr><th>ส่วน</th><th>แหล่ง</th><th>อัปเดต</th><th>ผู้รับผิดชอบ · รอบ</th></tr></thead><tbody>
             <tr><td>ประวัติสายทาง</td><td><a href="https://docs.google.com/spreadsheets/d/1mBDAhvJFgharY2JTV8VHcKCbUyLYVz4RThhGdu_JPM8/edit" target="_blank">ชีท "00.0 ประวัติโครงการก่อสร้าง"</a> — tab ต่อปี Y_64, Y_65, … (หาอัตโนมัติ)</td><td><span class="pill ok">สด · เพิ่มปี = เพิ่ม tab</span></td><td style="font-size:11.5px;color:var(--ink2)">ฝ่ายแผนงาน · เมื่อมีสัญญาใหม่</td></tr>
-            <tr><td>คำของบประมาณ</td><td><a href="https://docs.google.com/spreadsheets/d/1kCkIzb1veaqEnPK-fHMhY-mIbEs1LpVI9E5AdzwvfI8/edit" target="_blank">ชีท "00.4 รวมแผน (ประวัติสายทาง)"</a></td><td><span class="pill ok">สดทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">ฝ่ายแผนงาน · ช่วงจัดทำคำขอ</td></tr>
-            <tr><td>Zerobase (ความต้องการ)</td><td><a href="https://docs.google.com/spreadsheets/d/1i-hZYI74qz7kjO2ypo1fpEKxWwtLHojfTtIt1Pdz5jg/edit" target="_blank">ชีท ZEROBASE</a> — tab ต่อปี Z_71, Z_72, …</td><td><span class="pill ok">สด · เพิ่มปี = เพิ่ม tab</span></td><td style="font-size:11.5px;color:var(--ink2)">ฝ่ายแผนงาน · รายปี</td></tr>
+            <tr><td>คำของบประมาณ (แผนรายปี)</td><td><a href="https://docs.google.com/spreadsheets/d/1kCkIzb1veaqEnPK-fHMhY-mIbEs1LpVI9E5AdzwvfI8/edit" target="_blank">ชีท "00.4 รวมแผน"</a> — tab ต่อปี Q_71, Q_72, … (ยังไม่มี = tab แรกนับเป็นปี 2571)</td><td><span class="pill ok">สด · เพิ่มปี = เพิ่ม tab</span></td><td style="font-size:11.5px;color:var(--ink2)">ฝ่ายแผนงาน · ช่วงจัดทำคำขอ</td></tr>
+            <tr><td>Zerobase (ความต้องการเหมารวม)</td><td><a href="https://docs.google.com/spreadsheets/d/1i-hZYI74qz7kjO2ypo1fpEKxWwtLHojfTtIt1Pdz5jg/edit" target="_blank">ชีท ZEROBASE</a> — อ่านรวมทุก tab ไม่แยกปี (ได้รับงบแล้วลบแถวออก)</td><td><span class="pill ok">สดทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">ฝ่ายแผนงาน · เมื่อได้รับงบ/พบความต้องการ</td></tr>
             <tr><td>สภาพสายทาง (ผิว/ความกว้าง)</td><td><a href="https://docs.google.com/spreadsheets/d/1-eB4CqX7ZEUz8cCTvkK_9pMFJWQ4uPfMca4rtZRUoFo/edit" target="_blank">ชีทสภาพสายทาง</a></td><td><span class="pill ok">สด — โชว์ใน Strip Map</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · ปีละ 1-2 ครั้ง</td></tr>
             <tr><td>Equipment (ไฟฟ้า/ระบายน้ำ)</td><td><a href="https://docs.google.com/spreadsheets/d/1E4bxh9IqHv0lKixncJg0vkdmPBWyXu2zjQwgfkvQyVQ/edit?gid=293676884" target="_blank">ชีท Equipment</a></td><td><span class="pill ok">สดทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · เมื่อติดตั้ง/สำรวจ</td></tr>
             <tr><td>จุดเสี่ยงอันตราย</td><td><a href="https://docs.google.com/spreadsheets/d/1TaTJNJkiS6Ai1Iz7hRA-CkQJquCqOlkyd4kemKJffcY/edit" target="_blank">ชีทจุดเสี่ยงอันตราย</a> (5 แท็บตามหมวด — อ่านทุกแท็บอัตโนมัติ)</td><td><span class="pill live">สด — ดึงทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · เมื่อพบ/แก้ไข</td></tr>
@@ -431,21 +435,25 @@ select.search{width:auto}
           <b>เพิ่มปีงบใหม่/ปีย้อนหลัง:</b> สร้าง tab ชื่อ <code>Y_72</code> (หรือ <code>Y_64</code>, <code>Y_65</code>) ในชีทเดิม จบ — ระบบไล่หา Y_60–Y_85 อัตโนมัติทุกครั้งที่เปิด <u>ไม่ต้องแก้ไฟล์ dashboard</u> · ข้อแนะนำ: ให้ tab แรกสุดของไฟล์เป็น tab ปีที่ใช้จริง (ระบบอ่านปีจากเลขที่สัญญาให้เอง) หรือหน้าปกก็ได้</div>
         </details>
 
-        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">▥ คำของบประมาณ — Google Sheet "ประวัติสายทาง"</summary>
+        <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">▥ คำของบประมาณ — Google Sheet "รวมแผน" (tab ต่อปี แบบเดียวกับ Zerobase)</summary>
           <div style="font-size:12.5px;line-height:1.85;padding:8px 4px">
-          <b>ที่อยู่ข้อมูล:</b> Google Sheet "ประวัติสายทาง" (tab แรก)<br>
-          <b>คอลัมน์ที่อ่าน:</b> รหัสสายทาง · ชนิดงบ · ชื่อโครงการ · กิจกรรมโดยสังเขป · กม.เริ่ม · กม.จบ · งบประมาณ<br>
+          <b>ที่อยู่ข้อมูล:</b> Google Sheet "00.4 รวมแผน" — 1 tab ต่อปีงบ ชื่อ tab รูปแบบ <code>Q_71</code> <code>Q_72</code> … ระบบไล่หา <code>Q_68</code> ถึง <code>Q_82</code> อัตโนมัติ<br>
+          <b>สถานะตอนนี้:</b> ยังไม่มี tab Q_71 → ระบบอ่าน tab แรกของไฟล์เป็น <b>ปี 2571</b> (ตัวรวมแผนปีปัจจุบัน) ให้อัตโนมัติ<br>
+          <b>ขึ้นปีใหม่ (เช่น ปี 72):</b> สร้าง tab ใหม่ชื่อ <code>Q_72</code> เป๊ะๆ หัวตารางเหมือนเดิม แล้วกรอกได้เลย — ตัวเลือก "ปีงบ" ในหน้าคำของบจะขึ้นปีใหม่เอง (แนะนำ: ถ้าเริ่มใช้ tab ปี ให้ย้ายข้อมูลปัจจุบันไปไว้ใน tab <code>Q_71</code> ด้วย)<br>
+          <b>คอลัมน์ที่อ่าน:</b> รหัสสายทาง · ชนิดงบ · กิจกรรม · ลักษณะงาน (หรือ ชื่อโครงการ/กิจกรรมโดยสังเขป แบบเดิม) · กม.เริ่ม · กม.จบ · งบประมาณ<br>
           <b>กติกาการอ่าน:</b><br>
           • เอาเฉพาะแถวที่รหัสสายทางมีจุด เช่น ขก.4008 (แถวรหัส "0"/เขื่อน ถูกตัด)<br>
           • คำขอเดียวมีหลายช่วง กม. ได้ — พิมพ์ กม.เริ่ม/จบ หลายค่าในเซลล์โดยขึ้นบรรทัดใหม่ (Alt+Enter)<br>
           • <b>งบประมาณ</b> เว้นว่าง = ขึ้นสถานะ "รอประเมิน" อัตโนมัติ<br>
+          • <b>ความสัมพันธ์กับ Zerobase:</b> Zerobase = คลังความต้องการเหมารวม (ไม่แยกปี) → รายการที่ถูกจัดเข้าแผนปีใด ให้กรอกใน tab ปีนั้นของไฟล์นี้ → พอได้รับงบแล้ว ค่อยถอดรายการออกจากชีท Zerobase<br>
           <b>วิธีอัปเดต:</b> แก้ชีท → กด ⟳ ในหน้าคำของบ — ขึ้นทันที ไม่ต้องแก้ไฟล์ใดๆ</div>
         </details>
 
         <details><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--teal)">◪ Zerobase — Google Sheets ZEROBASE (tab ต่อปี ไม่ต้องแก้ไฟล์)</summary>
           <div style="font-size:12.5px;line-height:1.85;padding:8px 4px">
           <b>ที่อยู่ข้อมูล:</b> Google Sheets ไฟล์ ZEROBASE (ไฟล์เดิมของปี 2571)<br>
-          <b>ระบบหาปีเอง:</b> ทุกครั้งที่เปิด dashboard จะไล่หา tab ชื่อ <code>Z_68</code> ถึง <code>Z_82</code> อัตโนมัติ — เจอปีไหนขึ้นปีนั้นในตัวเลือก "ปีงบ" <u>ไม่ต้องแก้ไฟล์ dashboard เลย</u><br>
+          <b>แนวคิด:</b> Zerobase = <u>คลังความต้องการเหมารวม ไม่แยกปี</u> — ทุก tab ถูกอ่านรวมกันหมด รายการที่ได้รับงบแล้วให้ลบออกจากชีท (ที่เหลือ = ความต้องการคงค้างจริง) ส่วนการวางแผนรายปีไปทำที่หน้า "คำของบประมาณ"<br>
+          <b>ระบบอ่านทุก tab เอง:</b> ทุกครั้งที่เปิด dashboard จะไล่หา tab ชื่อ <code>Z_68</code> ถึง <code>Z_82</code> อัตโนมัติแล้วรวมทุกรายการเข้าด้วยกัน <u>ไม่ต้องแก้ไฟล์ dashboard เลย</u><br>
           <b>สถานะตอนนี้:</b> ยังไม่มี tab Z_71 → ระบบอ่านโครงเดิม (5 tab แยกหมวด: เมือง/น้ำพอง/หนองเรือ/มัญจาคีรี/พล) เป็นปี 2571 ให้อัตโนมัติ<br>
           <b>ขึ้นปีใหม่ (เช่น ปี 72):</b> ① สร้าง tab ใหม่ในไฟล์เดิม ตั้งชื่อ <code>Z_72</code> เป๊ะๆ ② ทำหัวตาราง: รหัสสายทาง · กิจกรรม · กม.เริ่ม · กม.จบ · หมายเหตุ (หัวตารางไม่ต้องอยู่แถวบนสุดก็ได้ ระบบหาแถวที่มี "รหัสสายทาง" เอง) ③ กรอกได้เลย ทุกหมวดรวมใน tab เดียว — หมวดขึ้นอัตโนมัติจากรหัสสาย<br>
           <b>กลุ่มกิจกรรมจัดอัตโนมัติจากชื่อกิจกรรม:</b> RECYCLING / HOT RE → ซ่อมบำรุงผิวทาง · มีคำว่า "ไฟฟ้า" → ไฟฟ้าแสงสว่าง (คิดต้น = ระยะ ÷ 30 ม.) · "ขยาย" → ขยายผิวจราจร · "ก่อสร้าง" → ก่อสร้าง · "ระบายน้ำ" → ระบบระบายน้ำ · "สะพาน" → สะพาน (คิดเป็นเมตร)<br>
@@ -1942,7 +1950,7 @@ function renderHistRoad(code){
       const zpl=zl.filter(zbIsE).reduce((s,x)=>s+(zbPoles(x)||0),0), ne=zl.filter(zbIsE).length;
       const zbr=zl.filter(zbIsB).reduce((s,x)=>s+((x.len||0)*1000),0), nb=zl.filter(zbIsB).length;
       return `<div class="grid kpis" style="margin-top:0">
-        <div class="card kpi" style="border-left:4px solid #e34948"><div class="lbl">Zerobase — คำขอของสายนี้</div><div class="val">${zl.length} <small>ช่วง</small></div><div class="foot">ปี ${[...new Set(zl.map(x=>x.year))].join(', ')}</div></div>
+        <div class="card kpi" style="border-left:4px solid #e34948"><div class="lbl">Zerobase — คำขอของสายนี้</div><div class="val">${zl.length} <small>ช่วง</small></div><div class="foot">เหมารวมทุกรายการ</div></div>
         <div class="card kpi" style="border-left:4px solid #e34948"><div class="lbl">งานถนน</div><div class="val">${zrd?fmt(+zrd.toFixed(2)):'—'}${zrd?' <small>กม.</small>':''}</div><div class="foot">${nrd?nrd+' คำขอ':'ไม่มีคำขอ'}</div></div>
         <div class="card kpi" style="border-left:4px solid #e34948"><div class="lbl">ไฟฟ้าแสงสว่าง</div><div class="val">${zpl?fmt(zpl):'—'}${zpl?' <small>ต้น</small>':''}</div><div class="foot">${ne?ne+' คำขอ':'ไม่มีคำขอ'}</div></div>
         <div class="card kpi" style="border-left:4px solid #e34948"><div class="lbl">สะพาน</div><div class="val">${zbr?fmt(Math.round(zbr)):'—'}${zbr?' <small>ม.</small>':''}</div><div class="foot">${nb?nb+' คำขอ':'ไม่มีคำขอ'}</div></div>
@@ -1961,8 +1969,8 @@ function renderHistRoad(code){
     </div>
     ${(!bridge&&rq.length)?`<div class="card" style="margin-top:14px">
       <h3><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#e87ba4;margin-right:7px"></span>คำของบประมาณของสายนี้ (${rq.length})</h3>
-      <div class="tblwrap" style="max-height:320px"><table><thead><tr><th>#</th><th>ชนิดงบ</th><th>กิจกรรม/โครงการ</th><th>ช่วง กม.</th><th class="num">งบประมาณ (บาท)</th></tr></thead><tbody>
-        ${rq.map((q,i)=>`<tr><td style="color:var(--muted)">${i+1}</td>
+      <div class="tblwrap" style="max-height:320px"><table><thead><tr><th>#</th><th>ปีที่ขอ</th><th>ชนิดงบ</th><th>กิจกรรม/โครงการ</th><th>ช่วง กม.</th><th class="num">งบประมาณ (บาท)</th></tr></thead><tbody>
+        ${rq.map((q,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td>${q.year||'–'}</td>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${btColor(catName(q.cat||''))||'#e87ba4'};margin-right:6px"></span>${esc(catName(q.cat||'–'))}</td>
           <td>${esc((q.act||q.proj)||'–')}</td>
           <td style="font-variant-numeric:tabular-nums;font-size:11.5px">${q.segs&&q.segs.length?q.segs.map(sg=>`${esc(String(sg.a||''))} – ${esc(String(sg.b||''))}`).join('<br>'):'— ไม่ระบุ —'}</td>
@@ -1972,8 +1980,8 @@ function renderHistRoad(code){
     </div>`:''}
     ${(!bridge&&zl.length)?`<div class="card" style="margin-top:14px">
       <h3><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#e34948;margin-right:7px"></span>ความต้องการ (Zerobase) ของสายนี้</h3>
-      <div class="tblwrap" style="max-height:360px"><table><thead><tr><th>#</th><th>ปี</th><th>กลุ่มกิจกรรม</th><th>กิจกรรม</th><th>ช่วง กม.</th><th class="num">ปริมาณ</th><th>หมายเหตุ</th></tr></thead><tbody>
-        ${zl.map((x,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td>${x.year}</td>
+      <div class="tblwrap" style="max-height:360px"><table><thead><tr><th>#</th><th>กลุ่มกิจกรรม</th><th>กิจกรรม</th><th>ช่วง กม.</th><th class="num">ปริมาณ</th><th>หมายเหตุ</th></tr></thead><tbody>
+        ${zl.map((x,i)=>`<tr><td style="color:var(--muted)">${i+1}</td>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${x.g.c};margin-right:6px"></span>${x.g.k}</td>
           <td>${esc(x.act)||'–'}</td>
           <td style="font-variant-numeric:tabular-nums;font-size:11.5px">${x.km1&&x.km2?`${esc(x.km1)} – ${esc(x.km2)}`:'— ไม่ระบุ —'}</td>
@@ -1999,7 +2007,7 @@ function renderHistRoad(code){
             .map(s=>({a:kmVal(s.a), b:kmVal(s.b)}))
             .filter(s=>s.a!=null&&s.b!=null&&s.b>s.a)
             .map(s=>({a:s.a, b:s.b, mk,
-              tip:`<b>คำของบ · ${esc(r.cat)}</b><br>${esc(r.act||r.proj)||''}<br>${kmLbl(s.a)} – ${kmLbl(s.b)} (${fmt(+(s.b-s.a).toFixed(2))} กม.)${e?`<br>💡 ≈ ${fmt(Math.max(1,Math.round((s.b-s.a)*1000/30)))} ต้น`:''}<br>งบ ${r.amt!=null?fmt(r.amt)+' บาท':'⏳ รอประเมิน'}`}));
+              tip:`<b>คำของบปี ${r.year} · ${esc(r.cat)}</b><br>${esc(r.act||r.proj)||''}<br>${kmLbl(s.a)} – ${kmLbl(s.b)} (${fmt(+(s.b-s.a).toFixed(2))} กม.)${e?`<br>💡 ≈ ${fmt(Math.max(1,Math.round((s.b-s.a)*1000/30)))} ต้น`:''}<br>งบ ${r.amt!=null?fmt(r.amt)+' บาท':'⏳ รอประเมิน'}`}));
         });
         const noSegN=rl.filter(r=>!r.segs.some(s=>{const a=kmVal(s.a),b=kmVal(s.b);return a!=null&&b!=null&&b>a;})).length;
         extra.push({label:'คำของบ', color:'#e87ba4', segs, noSegN});
@@ -2011,7 +2019,7 @@ function renderHistRoad(code){
       if(zl.length){
         const segs=zl.filter(r=>r.len!=null).map(r=>({a:r.d1, b:r.d2,
           mk:segMarkTxt((r.g.k||'')+' '+(r.act||''), null), // สัญลักษณ์เดียวกับเลนปี (ระบบระบายน้ำ = รางระบายน้ำ)
-          tip:`<b>Zerobase ปี ${r.year} · ${esc(r.g.k)}</b><br>${esc(r.act)}<br>${kmLbl(r.d1)} – ${kmLbl(r.d2)} (${fmt(+(r.d2-r.d1).toFixed(2))} กม.)${r.g.k==='ไฟฟ้าแสงสว่าง'?`<br>💡 ≈ ${fmt(zbPoles(r))} ต้น`:''}${r.note?`<br>📝 ${esc(r.note)}`:''}`}));
+          tip:`<b>Zerobase · ${esc(r.g.k)}</b><br>${esc(r.act)}<br>${kmLbl(r.d1)} – ${kmLbl(r.d2)} (${fmt(+(r.d2-r.d1).toFixed(2))} กม.)${r.g.k==='ไฟฟ้าแสงสว่าง'?`<br>💡 ≈ ${fmt(zbPoles(r))} ต้น`:''}${r.note?`<br>📝 ${esc(r.note)}`:''}`}));
         extra.push({label:'Zerobase', color:'#e34948', segs, noSegN:zl.filter(r=>r.len==null).length});
       }
     } else loadZerobase().catch(()=>{});
@@ -2239,36 +2247,63 @@ function drawStrip(container, roadLen, covered, list, YCOLOR, bridgesOnRoad, ext
   box.appendChild(lg);
 }
 
-/* ================= REQUESTS (live) ================= */
+/* ================= REQUESTS (live — tab ต่อปี Q_71, Q_72, … หาปีอัตโนมัติ แบบเดียวกับ Zerobase) ================= */
 const REQ_ID='1kCkIzb1veaqEnPK-fHMhY-mIbEs1LpVI9E5AdzwvfI8';
-let reqData=null;
+const REQ_PROBE_YEARS=Array.from({length:15},(_,i)=>68+i); // ไล่หา Q_68 … Q_82
+let reqData=null, reqYears=[], reqYearPick=null;
 async function loadRequests(force){
   if(reqData && force!==true) return;
   const body=document.getElementById('reqBody');
   body.innerHTML='<div class="loading"><span class="spin"></span>กำลังดึงข้อมูลจาก Google Sheets…</div>';
   try{
     const S=v=>String(v??'').trim();
-    const raw = (await sheetData(REQ_ID, 'gid=0')).filter(o=>{
-      const c=S(o['รหัสสายทาง']);
-      return c && c!=='0' && c.includes('.');
-    });
-    // 1 record = 1 คำขอ (แถวจริงในชีท) — ช่วง กม. หลายช่วงเก็บใน segs
-    const recs=[];
-    raw.forEach(o=>{
-      const starts=String(o['กม.เริ่ม']??'').split('\n').map(s=>s.trim()).filter(s=>s), ends=String(o['กม.จบ']??'').split('\n').map(s=>s.trim());
-      const segs=(starts.length?starts:['']).map((a,i)=>({a, b:ends[i]||''}));
-      recs.push({code:S(o['รหัสสายทาง']),
-        cat:S(o['ชนิดงบ'])||'— ไม่ระบุ',
-        proj:S(o['ชื่อโครงการ']),
-        act:S(o['กิจกรรมโดยสังเขป']),
-        segs,
-        amt:typeof o['งบประมาณ']==='number'?o['งบประมาณ']:num(o['งบประมาณ'])});
-    });
-    if(!recs.length) throw new Error('ไม่พบข้อมูล');
-    reqData=recs;
+    // แปลง 1 tab -> รายการคำขอของปีนั้น (หัวคอลัมน์ยืดหยุ่น: กิจกรรม/ลักษณะงาน หรือ ชื่อโครงการ/กิจกรรมโดยสังเขป)
+    const parseReq=(objs, year)=>{
+      const recs=[];
+      objs.filter(o=>{ const c=S(o['รหัสสายทาง']); return c && c!=='0' && c.includes('.'); }).forEach(o=>{
+        const starts=String(o['กม.เริ่ม']??'').split('\n').map(s=>s.trim()).filter(s=>s), ends=String(o['กม.จบ']??'').split('\n').map(s=>s.trim());
+        const segs=(starts.length?starts:['']).map((a,i)=>({a, b:ends[i]||''}));
+        recs.push({year, code:S(o['รหัสสายทาง']),
+          cat:S(o['ชนิดงบ'])||'— ไม่ระบุ',
+          proj:S(o['ชื่อโครงการ']??o['กิจกรรม']),
+          act:S(o['กิจกรรมโดยสังเขป']??o['ลักษณะงาน']??o['กิจกรรม']),
+          segs,
+          amt:typeof o['งบประมาณ']==='number'?o['งบประมาณ']:num(o['งบประมาณ'])});
+      });
+      return recs;
+    };
+    // 1) sentinel: ชื่อ tab ที่ไม่มีจริง gviz จะส่ง "tab แรก" กลับมา -> จำลายนิ้วมือไว้กรองปีหลอก
+    let sentinelFp=null;
+    try{ sentinelFp=JSON.stringify((await sheetData(REQ_ID,'sheet=__Q_PROBE_XX99__')).slice(0,25)); }catch(e){}
+    // 2) ไล่หา tab ปี Q_68 … Q_82 พร้อมกัน — เพิ่มปีใหม่แค่สร้าง tab ชื่อ Q_72 ในชีท
+    const probes=await Promise.allSettled(REQ_PROBE_YEARS.map(y=>
+      sheetData(REQ_ID,'sheet='+encodeURIComponent('Q_'+y)).then(objs=>({y,objs}))));
+    const seen=new Set(); let all=[]; const yearsFound=[];
+    for(const p of probes){
+      if(p.status!=='fulfilled') continue;
+      const fp=JSON.stringify(p.value.objs.slice(0,25));
+      if(fp===sentinelFp||seen.has(fp)) continue;
+      seen.add(fp);
+      const recs=parseReq(p.value.objs, 2500+p.value.y);
+      if(recs.length){ all=all.concat(recs); yearsFound.push(2500+p.value.y); }
+    }
+    // 3) ยังไม่มี tab Q_71 -> อ่าน tab แรกของไฟล์ (แบบเดิม) เป็นปี 2571
+    if(!yearsFound.length){
+      const recs=parseReq(await sheetData(REQ_ID,'gid=0'), 2571);
+      if(recs.length){ all=recs; yearsFound.push(2571); }
+    }
+    if(!all.length) throw new Error('ไม่พบข้อมูล — ตรวจว่าชีทแชร์ "ทุกคนที่มีลิงก์" และมี tab ปี (Q_71, Q_72, …) หรือข้อมูลใน tab แรก');
+    yearsFound.sort((a,b)=>a-b);
+    reqData=all; reqYears=yearsFound;
+    // ตัวเลือกปี: ค่าเริ่มต้น = ปีล่าสุด (ตัวรวมแผนปีปัจจุบัน)
+    if(reqYearPick==null||(reqYearPick!=='all'&&!yearsFound.includes(+reqYearPick))) reqYearPick=String(yearsFound[yearsFound.length-1]);
+    const ys=document.getElementById('reqYearSel');
+    ys.innerHTML=`<option value="all" ${reqYearPick==='all'?'selected':''}>ทุกปีรวมกัน (${yearsFound.join(' · ')})</option>`+
+      yearsFound.map(y=>`<option value="${y}" ${String(y)===reqYearPick?'selected':''}>ปี ${y}</option>`).join('');
     document.getElementById('reqPills').innerHTML=
       `<span class="hpill"><span class="dot live"></span> ข้อมูลสดจาก Google Sheets</span>`+
-      `<span class="hpill">▥ ${recs.length} คำขอ · ${new Set(recs.map(r=>r.code)).size} สาย</span>`+
+      `<span class="hpill">▥ ${all.length} คำขอ · ${new Set(all.map(r=>r.code)).size} สาย</span>`+
+      `<span class="hpill">📅 พบ ${yearsFound.length} ปี: ${yearsFound.join(' · ')}</span>`+
       `<span class="hpill">🕐 ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.</span>`;
     renderRequests();
     // เติมเลน "คำของบ" ใน strip map หน้าประวัติ ถ้าเปิดค้างอยู่
@@ -2278,8 +2313,12 @@ async function loadRequests(force){
     body.innerHTML=`<div class="banner err" style="display:block">ดึงข้อมูลไม่สำเร็จ (${esc(err.message)}) — ต้องเปิดผ่านอินเทอร์เน็ต และ Google Sheet ต้องแชร์แบบ "ทุกคนที่มีลิงก์"</div>`;
   }
 }
+const reqFiltered=()=>reqYearPick==='all'?reqData:reqData.filter(r=>String(r.year)===String(reqYearPick));
+document.getElementById('reqYearSel').addEventListener('change',e=>{ reqYearPick=e.target.value; renderRequests(); });
 function renderRequests(){
-  const Q=reqData;
+  const Q=reqFiltered();
+  const reqAll=reqYearPick==='all';
+  const yearLbl=reqAll?`ทุกปี (${reqYears.join(' · ')})`:'ปี '+reqYearPick;
   const byRoad={}; Q.forEach(r=>{ (byRoad[r.code]=byRoad[r.code]||[]).push(r); });
   const counts=Object.entries(byRoad).map(([c,l])=>[c,l.length]).sort((a,b)=>b[1]-a[1]);
   const specified=Q.filter(r=>r.amt!=null);
@@ -2292,7 +2331,7 @@ function renderRequests(){
   const muadWithReq=[...new Set(Object.keys(byRoad).map(c=>roadInfo[c]?.muad).filter(Boolean))];
   document.getElementById('reqBody').innerHTML=`
     <div class="grid kpis">
-      <div class="card kpi"><div class="lbl">คำขอทั้งหมด</div><div class="val">${Q.length} <small>คำขอ</small></div><div class="foot">คำขอเดียวมีได้หลายช่วง กม.</div></div>
+      <div class="card kpi"><div class="lbl">คำขอทั้งหมด</div><div class="val">${Q.length} <small>คำขอ</small></div><div class="foot">${esc(yearLbl)} — คำขอเดียวมีได้หลายช่วง กม.</div></div>
       <div class="card kpi"><div class="lbl">สายทางที่มีคำขอ</div><div class="val">${counts.length} <small>/ ${ALL_CODES.length} สาย</small></div><div class="foot">คิดเป็น ${(100*counts.length/ALL_CODES.length).toFixed(0)}% ของโครงข่าย</div></div>
       <div class="card kpi"><div class="lbl">ระยะทางที่ขอรวม</div><div class="val">${fmt(+totReqKm.toFixed(1))} <small>กม.</small></div><div class="foot">รวมทุกช่วงที่ระบุ กม.</div></div>
       <div class="card kpi"><div class="lbl">งบที่ระบุแล้วรวม</div><div class="val">${fmtM(totAmt)}</div><div class="foot">${specified.length} คำขอ</div></div>
@@ -2316,7 +2355,7 @@ function renderRequests(){
     <div class="card" style="margin-top:14px">
       <h3>สรุปรายสายทาง (ทั้ง ${counts.length} สายที่มีคำขอ)</h3><div class="note">คลิกแถวเพื่อเปิดมุมมองรวมรายสายด้านบน — % ของสาย = ระยะที่ขอรวม ÷ ระยะทางสาย</div>
       <div class="tblwrap" style="max-height:520px"><table id="reqRoadTable"><thead><tr>
-        <th>รหัส</th><th>ชื่อสายทาง</th><th>หมวด</th><th class="num">ระยะทางสาย (กม.)</th><th class="num">จำนวนคำขอ</th><th class="num">ระยะที่ขอรวม (กม.)</th><th class="num">% ของสาย</th><th class="num">งบระบุแล้ว (บาท)</th><th>ชนิดงบที่ขอ</th><th>One-Page</th>
+        <th>รหัส</th><th>ชื่อสายทาง</th><th>หมวด</th>${reqAll?'<th>ปีที่ขอ</th>':''}<th class="num">ระยะทางสาย (กม.)</th><th class="num">จำนวนคำขอ</th><th class="num">ระยะที่ขอรวม (กม.)</th><th class="num">% ของสาย</th><th class="num">งบระบุแล้ว (บาท)</th><th>ชนิดงบที่ขอ</th><th>One-Page</th>
       </tr></thead><tbody></tbody></table></div>
     </div>`;
   const top10=counts.slice(0,10);
@@ -2353,8 +2392,10 @@ function renderRequests(){
     const amt=list.reduce((a,x)=>a+(x.amt||0),0);
     const pct=(r?.len_acct&&km>0)?Math.min(100,100*km/r.len_acct):null;
     const catsIn=[...new Set(list.map(x=>x.cat))];
+    const yrsIn=[...new Set(list.map(x=>x.year))].sort();
     return `<tr data-code="${code}" style="cursor:pointer">
       <td><b>${code}</b></td><td>${esc(r?.name||'—')}</td><td>${r?.muad?'หมวด'+esc(r.muad):'—'}</td>
+      ${reqAll?`<td style="font-variant-numeric:tabular-nums;font-size:11.5px">${yrsIn.join(', ')}</td>`:''}
       <td class="num">${fmt(r?.len_acct)}</td><td class="num"><b>${n}</b></td><td class="num">${km>0?fmt(+km.toFixed(2)):'—'}</td>
       <td class="num">${pct!=null?`<b style="color:${pct>=50?'var(--crit)':'var(--ink)'}">${pct.toFixed(0)}%</b>`:'—'}</td>
       <td class="num">${amt?fmt(amt):'<span style="color:var(--crit)">รอประเมิน</span>'}</td>
@@ -2373,7 +2414,7 @@ function renderRequests(){
   renderReqDetail(counts[0][0]);
 }
 function renderReqDetail(code){
-  const list=reqData.filter(r=>r.code===code);
+  const list=reqFiltered().filter(r=>r.code===code);
   const tot=list.reduce((a,r)=>a+(r.amt||0),0);
   const rows=list.flatMap(r=>r.segs.map((s,i)=>({r,s,first:i===0})));
   document.getElementById('reqDetail').innerHTML=`
@@ -2381,7 +2422,7 @@ function renderReqDetail(code){
       มุมมองรวม — สายทาง ${esc(code)} (${list.length} คำขอ) · งบระบุแล้ว ${fmtM(tot)}</div>
     <div style="border:1px solid var(--grid);border-radius:8px;overflow:hidden">
     ${rows.map(({r,s,first})=>`<div class="reqrow">
-        <div><div class="cat" style="color:${r.cat==='— ไม่ระบุ'?'var(--crit)':'var(--navy)'}">${esc(r.cat)}</div>
+        <div><div class="cat" style="color:${r.cat==='— ไม่ระบุ'?'var(--crit)':'var(--navy)'}">${esc(r.cat)}${first?` <span style="color:var(--muted);font-weight:400;font-size:11px">· ปี ${r.year}</span>`:''}</div>
              <div class="rng">${esc(s.a||'—')}${s.b?' - '+esc(s.b):''}</div></div>
         <div style="font-size:12.5px">${first?esc(r.act||r.proj)||'—':''}</div>
         <div class="amt ${r.amt!=null?'ok':'wait'}">${r.amt!=null?(first?fmt(r.amt):''):'⏳ รอประเมิน'}</div>
@@ -2471,14 +2512,11 @@ async function loadZerobase(force){
     yearsFound.sort((a,b)=>a-b);
     zbData=all; zbYears=yearsFound;
     // ตัวเลือกปี: ค่าเริ่มต้น = ปีล่าสุด
-    if(zbYearPick==null||(zbYearPick!=='all'&&!yearsFound.includes(+zbYearPick))) zbYearPick=String(yearsFound[yearsFound.length-1]);
-    const ys=document.getElementById('zbYearSel');
-    ys.innerHTML=`<option value="all">ทุกปีรวมกัน (${yearsFound.join(' · ')})</option>`+
-      yearsFound.map(y=>`<option value="${y}" ${String(y)===zbYearPick?'selected':''}>ปี ${y}</option>`).join('');
+    zbYearPick='all'; // Zerobase = คลังความต้องการเหมารวม ไม่แยกปี (ได้รับงบแล้วค่อยถอดออกจากชีท)
     document.getElementById('zbPills').innerHTML=
       `<span class="hpill"><span class="dot live"></span> ข้อมูลสดจาก Google Sheets</span>`+
       `<span class="hpill">◪ ${all.length} คำขอ · ${new Set(all.map(r=>r.code)).size} สาย</span>`+
-      `<span class="hpill">📅 พบ ${yearsFound.length} ปี: ${yearsFound.join(' · ')}</span>`+
+      `<span class="hpill">♻ เหมารวมทุกรายการ — ได้รับงบแล้วถอดออกจากชีท</span>`+
       `<span class="hpill">🕐 ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.</span>`;
     renderZerobase();
     // เติมเลน Zerobase ใน strip map หน้าประวัติ ถ้าเปิดค้างอยู่
@@ -2510,8 +2548,8 @@ function renderZbOverview(){
   const brM=R.filter(zbIsB).reduce((s,r)=>s+((r.len||0)*1000),0);
   const nRd=R.filter(zbIsRd).length, nE=R.filter(zbIsE).length, nB=R.filter(zbIsB).length;
   const muads=[...new Set(roads.map(c=>roadInfo[c]?.muad).filter(Boolean))];
-  const yearLbl=zbYearPick==='all'?`ทุกปี (${zbYears.join(' · ')})`:'ปี '+zbYearPick;
-  const all=zbYearPick==='all';
+  const yearLbl='เหมารวมทุกรายการ';
+  const all=false; // ไม่แสดงมิติปี — Zerobase ถือเป็นคลังความต้องการรวม
   document.getElementById('zbBody').innerHTML=`
     <div class="grid kpis">
       <div class="card kpi"><div class="lbl">คำขอทั้งหมด</div><div class="val">${R.length} <small>ช่วง กม.</small></div><div class="foot">${esc(yearLbl)}</div></div>
@@ -2812,14 +2850,14 @@ async function printOnePage(code){
       </div>
       <div>
         ${rq.length?`<h2>คำของบประมาณของสายนี้ (${rq.length})</h2>
-        <table><thead><tr><th>ชนิดงบ</th><th>กิจกรรม/โครงการ</th><th>ช่วง กม.</th><th class="r">งบประมาณ (บาท)</th></tr></thead><tbody>
-          ${rq.slice(0,7).map(q=>`<tr><td>${esc(catName(q.cat||'–'))}</td><td style="font-size:10.5px">${esc(((q.act||q.proj)||'–').slice(0,30))}</td><td style="font-size:10px">${q.segs&&q.segs.length?q.segs.map(sg=>esc(String(sg.a||''))+'–'+esc(String(sg.b||''))).join(', ').slice(0,24):'—'}</td><td class="r">${q.amt!=null?fmt(q.amt):'<span class="pill p-warn">รอประเมิน</span>'}</td></tr>`).join('')}
-          ${rq.length>7?`<tr><td colspan="4" style="color:#8794a5;font-style:italic">…อีก ${rq.length-7} คำขอ</td></tr>`:''}
+        <table><thead><tr><th>ปีที่ขอ</th><th>ชนิดงบ</th><th>กิจกรรม/โครงการ</th><th>ช่วง กม.</th><th class="r">งบประมาณ (บาท)</th></tr></thead><tbody>
+          ${rq.slice(0,7).map(q=>`<tr><td>${q.year||'–'}</td><td>${esc(catName(q.cat||'–'))}</td><td style="font-size:10.5px">${esc(((q.act||q.proj)||'–').slice(0,30))}</td><td style="font-size:10px">${q.segs&&q.segs.length?q.segs.map(sg=>esc(String(sg.a||''))+'–'+esc(String(sg.b||''))).join(', ').slice(0,24):'—'}</td><td class="r">${q.amt!=null?fmt(q.amt):'<span class="pill p-warn">รอประเมิน</span>'}</td></tr>`).join('')}
+          ${rq.length>7?`<tr><td colspan="5" style="color:#8794a5;font-style:italic">…อีก ${rq.length-7} คำขอ</td></tr>`:''}
         </tbody></table>`:''}
-        ${zl.length?`<h2>ความต้องการ (Zerobase)</h2>
-        <table><thead><tr><th>ปี</th><th>กลุ่ม</th><th>กิจกรรม</th><th>ช่วง กม.</th><th class="r">ปริมาณ</th></tr></thead><tbody>
-          ${zl.slice(0,7).map(x=>`<tr><td>${x.year}</td><td>${esc(x.g.k)}</td><td style="font-size:10.5px">${esc((x.act||'–').slice(0,26))}</td><td style="font-size:10px">${x.km1&&x.km2?esc(x.km1)+'–'+esc(x.km2):'—'}</td><td class="r">${x.len==null?'—':(zbIsE(x)?fmt(zbPoles(x))+' ต้น':fmt(Math.round(x.len*1000))+' ม.')}</td></tr>`).join('')}
-          ${zl.length>7?`<tr><td colspan="5" style="color:#8794a5;font-style:italic">…อีก ${zl.length-7} ช่วง</td></tr>`:''}
+        ${zl.length?`<h2>ความต้องการ (Zerobase — เหมารวม)</h2>
+        <table><thead><tr><th>กลุ่ม</th><th>กิจกรรม</th><th>ช่วง กม.</th><th class="r">ปริมาณ</th></tr></thead><tbody>
+          ${zl.slice(0,7).map(x=>`<tr><td>${esc(x.g.k)}</td><td style="font-size:10.5px">${esc((x.act||'–').slice(0,26))}</td><td style="font-size:10px">${x.km1&&x.km2?esc(x.km1)+'–'+esc(x.km2):'—'}</td><td class="r">${x.len==null?'—':(zbIsE(x)?fmt(zbPoles(x))+' ต้น':fmt(Math.round(x.len*1000))+' ม.')}</td></tr>`).join('')}
+          ${zl.length>7?`<tr><td colspan="4" style="color:#8794a5;font-style:italic">…อีก ${zl.length-7} ช่วง</td></tr>`:''}
         </tbody></table>`:''}
         ${rk.length?`<h2>จุดเสี่ยงอันตรายของสายนี้</h2>
         <table><thead><tr><th>ประเภท</th><th>กม.</th><th>ระดับ</th><th>สถานะ</th></tr></thead><tbody>
