@@ -188,7 +188,7 @@ select.search{width:auto}
     <div class="brand">
       <h1>Big Data สายทาง</h1>
       <div class="sub">แขวงทางหลวงชนบทขอนแก่น<br>กรมทางหลวงชนบท</div>
-      <div class="ver">v17.0 · 21 ก.ค. 2569</div>
+      <div class="ver">v17.2 · 21 ก.ค. 2569</div>
     </div>
     <nav class="nav">
       <button data-page="overview" class="active"><span class="ico">▦</span> ภาพรวมโครงข่าย</button>
@@ -386,6 +386,7 @@ select.search{width:auto}
             <tr><td>Equipment (ไฟฟ้า/ระบายน้ำ)</td><td><a href="https://docs.google.com/spreadsheets/d/1E4bxh9IqHv0lKixncJg0vkdmPBWyXu2zjQwgfkvQyVQ/edit?gid=293676884" target="_blank">ชีท Equipment</a></td><td><span class="pill ok">สดทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · เมื่อติดตั้ง/สำรวจ</td></tr>
             <tr><td>จุดเสี่ยงอันตราย</td><td><a href="https://docs.google.com/spreadsheets/d/1TaTJNJkiS6Ai1Iz7hRA-CkQJquCqOlkyd4kemKJffcY/edit" target="_blank">ชีทจุดเสี่ยงอันตราย</a> (5 แท็บตามหมวด — อ่านทุกแท็บอัตโนมัติ)</td><td><span class="pill live">สด — ดึงทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · เมื่อพบ/แก้ไข</td></tr>
             <tr><td>งานบำรุงปกติ (Routine หมวด)</td><td>Google Form "บันทึกงานบำรุงปกติ" (รอสร้าง — โครงคำถามอยู่หน้างานบำรุงปกติ)</td><td><span class="pill wait">รอสร้างฟอร์ม + แจ้ง Claude ผูก</span></td><td style="font-size:11.5px;color:var(--ink2)">หมวดบำรุงทาง (5 หมวด) · ทุกครั้งที่ทำงาน</td></tr>
+            <tr><td>สถิติผู้เข้าชม</td><td><a href="https://docs.google.com/spreadsheets/d/1Y3JXLPvuvddZYx9Chn_KjZPFo0idWqyPhA3k9uhnoLg/edit" target="_blank">ชีท "สถิติเข้าชม Dashboard"</a> (tab log) + Apps Script Web App</td><td><span class="pill live">อัตโนมัติ — นับทุกครั้งที่เปิด</span></td><td style="font-size:11.5px;color:var(--ink2)">อัตโนมัติ · ไม่ต้องดูแล</td></tr>
             <tr><td>รูปจุดเสี่ยง (ทีมงานส่งผ่านฟอร์ม)</td><td><a href="https://docs.google.com/forms/d/e/1FAIpQLScb3ZA204nQ2KkiRYTlFKIW6-7hUq2_2oSCCSHmHyJFw1ptPQ/viewform" target="_blank">ฟอร์มรูปก่อนแก้</a> · <a href="https://forms.gle/vyJZiDj8MF4xBQra9" target="_blank">ฟอร์มรูปหลังแก้</a> · <a href="https://docs.google.com/spreadsheets/d/1y-ikalmjMXzsGQWnNTk27y-ud9tyxTvzmn4xcYmgMh8/edit" target="_blank">ชีทคำตอบ(หลัง)</a> · <a href="https://docs.google.com/spreadsheets/d/1i8pVX2nOiTNkxbWEqOl9IpPJRMAMGCeuszKISeDfJs4/edit?gid=188489456" target="_blank">ชีทคำตอบ</a> · <a href="https://drive.google.com/drive/folders/1uDvXeyCessLZa-L5OOTrREw5Wc0imDdRmVy1ntfeedWsYysHVlEu5I_jXF0JYHLPJ6Bfmbl6" target="_blank">โฟลเดอร์รูป</a></td><td><span class="pill live">สด — จับคู่รหัสสายอัตโนมัติ</span></td><td style="font-size:11.5px;color:var(--ink2)">ทีมสำรวจหน้างาน · ทันทีที่ถ่าย</td></tr>
             <tr><td>ภาพรวม / สรุปรายหมวด / ทะเบียน</td><td>DRR_KK_Master.xlsx ชีท "สายทาง" (snapshot 15 ก.ค. 2569)</td><td><span class="pill wait">แจ้ง Claude rebuild</span></td><td style="font-size:11.5px;color:var(--ink2)">วิชาการ (KORN) · เมื่อบัญชีสายทางเปลี่ยน</td></tr>
             <tr><td>สะพานชุมชน / สะพานในสาย</td><td>ข้อมูลสายทางขอนแก่น.xlsx ชีท "สะพานชุมชน", "สะพานในสายทาง", "ถนน-สะพานถ่ายโอน" (snapshot)</td><td><span class="pill wait">แจ้ง Claude rebuild</span></td><td style="font-size:11.5px;color:var(--ink2)">วิชาการ (KORN) · เมื่อบัญชีเปลี่ยน</td></tr>
@@ -399,6 +400,11 @@ select.search{width:auto}
         <div id="sysCodeCheck"></div>
       </div>
       <div class="card" style="margin-top:14px"><h3>สายทางที่ยังไม่มีเส้น GPS จริง (แนวประมาณ — รอสำรวจ)</h3><div class="note">แสดงบนแผนที่เป็น "เส้นประ" ชั่วคราว (ลากตรงจุดเริ่ม-จุดจบ) จนกว่าจะเก็บ GPS จริง</div><div id="sysStubs"></div></div>
+
+      <div class="card" style="margin-top:14px"><h3>👀 สถิติผู้เข้าชม Dashboard</h3>
+        <div class="note">นับทุกครั้งที่มีคนเปิด dashboard (ทั้งเปิดจากไฟล์ในเครื่องและจากลิงก์เว็บ) — บันทึกลง Google Sheet ของเราเอง</div>
+        <div id="sysVisits"></div>
+      </div>
 
       <div class="card" style="margin-top:14px"><h3>📍 วิธีอัปเดตข้อมูล GIS (เมื่อสำรวจเส้นทางใหม่เสร็จ)</h3>
         <table style="font-size:12.5px"><thead><tr><th style="width:44px">ขั้น</th><th>ทำอะไร</th></tr></thead><tbody>
@@ -1149,6 +1155,7 @@ function renderSystem(){
     <div class="card kpi"><div class="lbl">GIS เกินบัญชี Master</div><div class="val">${(EMB.gisExtra||[]).length} <small>สาย</small></div><div class="foot">ไม่นำมาแสดง — ยึด Master เป็นหลัก</div></div>
     <div class="card kpi"><div class="lbl">HISTORY ไม่มีเลขที่สัญญา</div><div class="val">${histDropped==null?'–':histDropped} <small>แถว</small></div><div class="foot">${histDropped==null?'เปิดหน้าประวัติโครงการก่อน':'ถูกตัดออกจากรายงาน รอกรอกเพิ่ม'}</div></div>
     <div class="card kpi"><div class="lbl">คัดออก (ไม่ใช่งบก่อสร้าง)</div><div class="val">${histData?histExcluded:'–'} <small>แถว</small></div><div class="foot">นับเฉพาะประเภทงบก่อสร้างตามข้อกำหนด</div></div>`;
+  renderVisits();
   const rowsByCode=Object.fromEntries(R.map(r=>[r.code,r]));
   document.getElementById('sysStubs').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px">${
     [...stubs].sort((a,b)=>SUF3(a)-SUF3(b)).map(c=>`<span class="pill wait" title="${esc(rowsByCode[c]?.name||'')}">${c} · ${esc(rowsByCode[c]?.amphoe||'-')}</span>`).join('')}</div>
@@ -2889,6 +2896,50 @@ async function printOnePage(code){
   </div>`:''}
   <scr`+`ipt>window.onload=()=>setTimeout(()=>window.print(),400);</scr`+`ipt></body></html>`);
   w.document.close();
+}
+/* ================= สถิติผู้เข้าชม (Apps Script + Google Sheet) ================= */
+const VISIT_URL='https://script.google.com/macros/s/AKfycbwwhrDO2kZ2XTCDxtTRdaqwH4WZVxYeDyVgJloE3SQ-ElO0LqaCJqe3TvSk5CaufjOy/exec'; // Web App นับผู้เข้าชม
+const VISIT_ID='1Y3JXLPvuvddZYx9Chn_KjZPFo0idWqyPhA3k9uhnoLg'; // ชีท "สถิติเข้าชม Dashboard" (tab: log)
+/* ยิงสัญญาณ 1 ครั้งต่อการเปิด (Image beacon ใช้ได้ทั้งเปิดจากไฟล์ในเครื่องและจากเว็บ) */
+(function(){ if(!VISIT_URL) return; try{
+  const src=location.protocol==='file:'?'ไฟล์ในเครื่อง':(location.host||'เว็บ');
+  const ua=(/(Edg|Chrome|Firefox|Safari)\/[\d.]+/.exec(navigator.userAgent)||['ไม่ทราบ'])[0].split('/')[0];
+  const dev=/Mobi|Android/i.test(navigator.userAgent)?'มือถือ':'คอมพิวเตอร์';
+  new Image().src=VISIT_URL+'?src='+encodeURIComponent(src)+'&ua='+encodeURIComponent(ua)+'&dev='+encodeURIComponent(dev)+'&cb='+Math.random();
+}catch(e){} })();
+async function renderVisits(){
+  const box=document.getElementById('sysVisits'); if(!box) return;
+  if(!VISIT_ID){
+    box.innerHTML=`<div class="note">ยังไม่ได้ผูกระบบนับผู้เข้าชม — สร้างชีท "สถิติเข้าชม Dashboard" + Apps Script ตามคู่มือที่ Claude ส่งให้ แล้วส่ง 2 ลิงก์ (URL Web App + ลิงก์ชีท) ให้ Claude ผูก</div>`;
+    return;
+  }
+  box.innerHTML='<div class="loading"><span class="spin"></span>กำลังดึงสถิติ…</div>';
+  try{
+    const rows=await sheetData(VISIT_ID,'sheet=log');
+    const recs=rows.map(o=>{ const d=parseThaiDate(String(o['เวลา']||'')); return d?{d, src:String(o['ช่องทาง']||'ไม่ระบุ'), dev:String(o['อุปกรณ์']||'')}:null; }).filter(Boolean).sort((a,b)=>a.d-b.d);
+    if(!recs.length) throw new Error('ยังไม่มีข้อมูล');
+    const today=new Date(); const key=d=>d.toISOString().slice(0,10);
+    const tKey=key(today);
+    const nToday=recs.filter(r=>key(r.d)===tKey).length;
+    const d30=new Date(today); d30.setDate(d30.getDate()-29);
+    const in30=recs.filter(r=>r.d>=new Date(d30.getFullYear(),d30.getMonth(),d30.getDate()));
+    const bySrc={}; recs.forEach(r=>bySrc[r.src]=(bySrc[r.src]||0)+1);
+    // กราฟรายวัน 30 วันหลัง
+    const days=[]; for(let i=29;i>=0;i--){ const d=new Date(today); d.setDate(d.getDate()-i); days.push(key(d)); }
+    const cnt=Object.fromEntries(days.map(k=>[k,0])); in30.forEach(r=>{ const k=key(r.d); if(k in cnt) cnt[k]++; });
+    box.innerHTML=`<div class="grid kpis" style="margin-bottom:10px">
+        <div class="card kpi"><div class="lbl">เปิดดูทั้งหมด</div><div class="val">${fmt(recs.length)} <small>ครั้ง</small></div><div class="foot">ตั้งแต่เริ่มนับ ${recs[0]?recs[0].d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):''}</div></div>
+        <div class="card kpi"><div class="lbl">วันนี้</div><div class="val">${fmt(nToday)} <small>ครั้ง</small></div><div class="foot">${today.toLocaleDateString('th-TH',{dateStyle:'long'})}</div></div>
+        <div class="card kpi"><div class="lbl">30 วันหลังสุด</div><div class="val">${fmt(in30.length)} <small>ครั้ง</small></div><div class="foot">เฉลี่ย ${(in30.length/30).toFixed(1)} ครั้ง/วัน</div></div>
+        <div class="card kpi"><div class="lbl">ช่องทาง</div><div class="val" style="font-size:15px;line-height:1.6">${Object.entries(bySrc).sort((a,b)=>b[1]-a[1]).map(([s,n])=>`${esc(s)} <b>${fmt(n)}</b>`).join('<br>')}</div><div class="foot">ไฟล์ในเครื่อง / เว็บ</div></div>
+      </div><div id="chVisits"></div>`;
+    vbar('chVisits', days.map(k=>k.slice(8,10)+'/'+k.slice(5,7)),
+      [{label:'ครั้ง', color:C.teal, data:days.map(k=>cnt[k]),
+        tips:days.map(k=>`<b>${k.slice(8,10)}/${k.slice(5,7)}</b><br>${cnt[k]} ครั้ง`)}],
+      {unit:'ครั้ง', height:190, fmtVal:v=>fmt(Math.round(v))});
+  }catch(err){
+    box.innerHTML=`<div class="banner err" style="display:block">ดึงสถิติไม่สำเร็จ (${esc(err.message)}) — ตรวจว่าชีทแชร์ "ทุกคนที่มีลิงก์" และมี tab ชื่อ log</div>`;
+  }
 }
 const ROUTINE_ID='';  // ชีทคำตอบฟอร์ม "บันทึกงานบำรุงปกติ" — ได้ลิงก์แล้วเอา ID มาใส่
 let routineData=null;
