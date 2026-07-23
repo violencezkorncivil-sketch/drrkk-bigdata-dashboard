@@ -189,7 +189,7 @@ select.search{width:auto}
     <div class="brand">
       <h1>Big Data สายทาง</h1>
       <div class="sub">แขวงทางหลวงชนบทขอนแก่น<br>กรมทางหลวงชนบท</div>
-      <div class="ver">v18.6 · 23 ก.ค. 2569</div>
+      <div class="ver">v18.7 · 23 ก.ค. 2569</div>
     </div>
     <nav class="nav">
       <button data-page="overview" class="active"><span class="ico">▦</span> ภาพรวมโครงข่าย</button>
@@ -1722,12 +1722,16 @@ async function loadHistory(force){
           const q=pb[i]; const lbl=(q&&q.lbl)||p.lbl;
           return p.km+(q?' - '+q.km:'')+(lbl?` (${lbl})`:'');
         }).join(', '):'';
+        // กติกาป้ายวงเล็บชนะ: ถ้าโครงการติดป้าย (สะพาน)/(ไฟฟ้า) กำกับช่วงใดไว้แล้ว
+        // ช่วงที่เหลือที่ "ไม่ติดป้าย" ถือเป็นถนน — ไม่เหมาตามชื่อโครงการ (เช่น "Recycling, ก่อสร้างสะพาน")
+        const hasTypedLbl=pa.some((p,i)=>{ const q=pb[i]; const lbl=(q&&q.lbl)||p.lbl; return lbl&&(SEG_E.test(lbl)||SEG_B.test(lbl)); });
+        const fbType=hasTypedLbl?'r':projType;
         const segs=pa.map((p,i)=>{
           const q=pb[i]||{};
           const lbl=q.lbl||p.lbl;
           let a=kmVal(p.km), b=kmVal(q.km);
-          if(a!=null&&(b==null||b===a)) return {a, b:a, t:segTypeOf(lbl,projType), lbl:lbl||null, pt:true}; // งานตำแหน่งเดียว -> ▲
-          return {a, b, t:segTypeOf(lbl,projType), lbl:lbl||null};
+          if(a!=null&&(b==null||b===a)) return {a, b:a, t:segTypeOf(lbl,fbType), lbl:lbl||null, pt:true}; // งานตำแหน่งเดียว -> ▲
+          return {a, b, t:segTypeOf(lbl,fbType), lbl:lbl||null};
         }).filter(s=>s.a!=null&&s.b!=null&&s.b>=s.a);
         recs.push({year, code, contract, roadFull:S(o.roadFull),
           budgetType:bt,
@@ -2329,6 +2333,13 @@ const segMark=(x,sg)=>{
   if((sg.t||'r')==='e') return 'elec';
   const m=segMarkTxt(t,x.amount);
   if(m==='full'||m==='thin') return ((sg.lbl&&roadClsTxt(sg.lbl))||roadCls(x))==='บำรุง'?'thin':'full';
+  if(m==='bridge'||m==='elec'){
+    // ช่วงนี้ถูกจัดเป็น "ถนน" แล้ว (ป้ายวงเล็บชนะ) แต่ชื่อโครงการมีคำสะพาน/ไฟฟ้าปน
+    // -> จำแนกจากส่วนงานถนน โดยตัดคำสะพาน/ไฟฟ้าออกจากชื่อก่อน (เช่น "Recycling, ก่อสร้างสะพาน" -> "Recycling")
+    const t2=t.replace(/ก่อสร้างสะพาน|สะพาน|ไฟฟ้าแสงสว่าง|ไฟกระพริบ|ไฟสัญญาณ|ไฟฟ้า|แสงสว่าง/g,'');
+    const cls=(sg.lbl&&roadClsTxt(sg.lbl))||roadClsTxt(t2)||'บำรุง';
+    return cls==='บำรุง'?'thin':'full';
+  }
   return m;
 };
 function drawStrip(container, roadLen, covered, list, YCOLOR, bridgesOnRoad, extraLanes, topLanes){
