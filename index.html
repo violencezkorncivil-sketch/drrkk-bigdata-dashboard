@@ -189,7 +189,7 @@ select.search{width:auto}
     <div class="brand">
       <h1>Big Data สายทาง</h1>
       <div class="sub">แขวงทางหลวงชนบทขอนแก่น<br>กรมทางหลวงชนบท</div>
-      <div class="ver">v18.5 · 22 ก.ค. 2569</div>
+      <div class="ver">v18.6 · 23 ก.ค. 2569</div>
     </div>
     <nav class="nav">
       <button data-page="overview" class="active"><span class="ico">▦</span> ภาพรวมโครงข่าย</button>
@@ -1543,7 +1543,8 @@ function redrawMap(){
   const kmOn=M.kmShow!==false&&z>=12, kmR=z>=15?3.4:(z>=13?2.9:2.4);
   (M.kmDots||[]).forEach(d2=>{
     const roadVisible=M.layers[d2.code]&&M.layers[d2.code].path.style.display!=='none';
-    const show=kmOn&&roadVisible;
+    // สายที่เลือกอยู่: โชว์หลัก กม. เสมอ (ไม่ต้องรอซูมถึง 12) — สายเดียวไม่รก
+    const show=roadVisible&&(kmOn||(M.kmShow!==false&&d2.code===activeCode));
     d2.c.style.display=show?'':'none';
     if(show){ d2.c.setAttribute('cx',(lon2x(d2.lon,z)-ox).toFixed(1)); d2.c.setAttribute('cy',(lat2y(d2.lat,z)-oy).toFixed(1)); d2.c.setAttribute('r',kmR); }
   });
@@ -1673,6 +1674,9 @@ function selectRoad(code){
     M.svg.appendChild(M.selCasing);
     L.path.setAttribute('stroke-width',4.5); L.path.setAttribute('stroke-opacity',1);
     M.svg.appendChild(L.path);
+    // ยกหลัก กม. ของสายที่เลือก + สะพาน ขึ้นเหนือเส้นไฮไลต์ (ไม่งั้นโดนเส้นหนาทับ)
+    (M.kmDots||[]).forEach(d=>{ if(d.code===code) M.svg.appendChild(d.c); });
+    (M.bridges||[]).forEach(b=>M.svg.appendChild(b.g));
     redrawMap(); fitBounds(L.bounds); openPopup(code); }
   else banner('err', code+' ยังไม่มีเส้น GPS จริง (รอสำรวจ — ดูสรุปที่หน้าข้อมูลระบบ)');
 }
